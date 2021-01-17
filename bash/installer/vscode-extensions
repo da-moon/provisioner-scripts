@@ -56,7 +56,6 @@ extensions=(
 "wayou.vscode-todo-highlight"
 "DavidAnson.vscode-markdownlint"
 )
-
 for i in "${extensions[@]}";do 
   code --install-extension "$i"
 done
