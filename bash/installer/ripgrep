@@ -33,26 +33,30 @@ else
     sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
   fi
 fi
-if [ ! $(which curl) ]; then
-    echo 'Please install "curl" package' 1>&2
+
+if [ ! -n "$(command -v rg )" ]; then
+  if [ ! $(which curl) ]; then
+      echo 'Please install "curl" package' 1>&2
+      exit 1
+  fi
+  if [ ! $(which wget) ]; then
+      echo 'Please install "wget" package' 1>&2
+      exit 1
+  fi
+  if [ ! $(which jq) ]; then
+    echo 'Please install "jq" package' 1>&2
     exit 1
+  fi
+  rm -rf /tmp/ripgrep*
+  mkdir -p /tmp/ripgrep
+  curl -sL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("x86_64") and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget --quiet --no-cache -O /tmp/ripgrep.tar.gz {}
+  sudo tar \
+      -xzf /tmp/ripgrep.tar.gz \
+      -C /tmp/ripgrep \
+      --strip-components=1
+  sudo mv /tmp/ripgrep/rg /usr/local/bin/rg
+  sudo mv /tmp/ripgrep/complete/rg.bash  /etc/bash_completion.d/rg.bash
+  sudo chmod +x /usr/local/bin/rg
+  sudo rm -r /tmp/ripgrep*
 fi
-if [ ! $(which wget) ]; then
-    echo 'Please install "wget" package' 1>&2
-    exit 1
-fi
-if [ ! $(which jq) ]; then
-  echo 'Please install "jq" package' 1>&2
-  exit 1
-fi
-rm -rf /tmp/ripgrep*
-mkdir -p /tmp/ripgrep
-curl -sL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("x86_64") and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget --quiet --no-cache -O /tmp/ripgrep.tar.gz {}
-sudo tar \
-    -xzf /tmp/ripgrep.tar.gz \
-    -C /tmp/ripgrep \
-    --strip-components=1
-sudo mv /tmp/ripgrep/rg /usr/local/bin/rg
-sudo mv /tmp/ripgrep/complete/rg.bash  /etc/bash_completion.d/rg.bash
-sudo chmod +x /usr/local/bin/rg
-sudo rm -r /tmp/ripgrep*
+
