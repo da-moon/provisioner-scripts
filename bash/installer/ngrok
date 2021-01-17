@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -o errtrace
+set -o functrace
+set -o errexit
+set -o nounset
+set -o pipefail
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+if [ ! $(which wget) ]; then
+	echo 'Please install wget package'
+	exit 1
+fi
+if [ ! $(which unzip) ]; then
+	echo 'Please install zip package'
+	exit 1
+fi
+while [ -z "${NGROK_TOKEN+x}" ] ; do
+  printf "\n❗ The NGROK_TOKEN environment variable is required. Please enter its value.\n" &&
+  read -s -p "NGROK_TOKEN: " NGROK_TOKEN ;
+done ; export NGROK_TOKEN="$NGROK_TOKEN" && printf "\n'NGROK_TOKEN' environment variable was set successfully\n";
+sudo rm -rf /usr/local/bin/ngrok.zip
+sudo rm -rf /usr/local/bin/ngrok
+sudo wget -qO /usr/local/bin/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+sudo unzip -qqd /usr/local/bin /usr/local/bin/ngrok.zip
+sudo rm -rf /usr/local/bin/ngrok.zip
+ngrok --version
+# [NOTE] => ngrok setup
+rm -rf ~/.ngrok2
+mkdir -p ~/.ngrok2
+mkdir -p $HOME/.local/log
+cat << EOF | tee ~/.ngrok2/ngrok.yml > /dev/null
+authtoken: "${NGROK_TOKEN}"
+log_level: info
+log_format: json
+log: $HOME/.local/log/ngrok.log
+tunnels:
+  terraform-ui:
+    addr: 127.0.0.1:32846
+    proto: http
+    hostname: heimdal-tfe.ngrok.io
+    inspect: true
+    bind_tls: true
+EOF
+sudo mkdir -p /usr/lib/systemd/system/
+cat << EOF | sudo tee /usr/lib/systemd/system/ngrok@.service > /dev/null
+[Unit]
+Description=ngrok
+After=network.target
+
+[Service]
+User=%i
+ExecStartPre=rm -f \$HOME/.local/log/ngrok.log
+ExecStart=/usr/local/bin/ngrok start --all
+ExecReload=/bin/kill -HUP \$MAINPID
+KillMode=process
+IgnoreSIGPIPE=true
+PrivateTmp=true
+Type=simple
+Restart=always
+RestartSec=1min
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl stop ngrok@`whoami`.service || true;
+sudo systemctl disable --now ngrok@`whoami`.service || true;
+sudo systemctl enable --now ngrok@`whoami`.service
+sudo systemctl restart --now ngrok@`whoami`.service
+sudo systemctl status ngrok@`whoami`.service --lines=0 | more

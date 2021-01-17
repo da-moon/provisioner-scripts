@@ -1,0 +1,845 @@
+#!/bin/bash
+set -o errtrace
+set -o functrace
+set -o errexit
+set -o nounset
+set -o pipefail
+export DEBIAN_FRONTEND=noninteractive
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+function string_contains() {
+  local -r haystack="$1"
+  local -r needle="$2"
+  [[ "$haystack" == *"$needle"* ]]
+}
+function string_multiline_contains() {
+  local -r haystack="$1"
+  local -r needle="$2"
+  echo "$haystack" | grep -q "$needle"
+}
+function string_to_uppercase() {
+  local -r str="$1"
+  echo "$str" | awk '{print toupper($0)}'
+}
+function string_strip_prefix() {
+  local -r str="$1"
+  local -r prefix="$2"
+  echo "${str#$prefix}"
+}
+function string_strip_suffix() {
+  local -r str="$1"
+  local -r suffix="$2"
+  echo "${str%$suffix}"
+}
+function string_is_empty_or_null() {
+  local -r response="$1"
+  [[ -z "$response" || "$response" == "null" ]]
+}
+function string_colorify() {
+  local -r color_code="$1"
+  local -r input="$2"
+  echo -e "\e[1m\e[$color_code"m"$input\e[0m"
+}
+function string_blue() {
+  local -r color_code="34"
+  local -r input="$1"
+  echo -e "$(string_colorify "${color_code}" "${input}")"
+}
+function string_yellow() {
+  local -r color_code="93"
+  local -r input="$1"
+  echo -e "$(string_colorify "${color_code}" "${input}")"
+}
+function string_green() {
+  local -r color_code="32"
+  local -r input="$1"
+  echo -e "$(string_colorify "${color_code}" "${input}")"
+}
+function string_red() {
+  local -r color_code="31"
+  local -r input="$1"
+  echo -e "$(string_colorify "${color_code}" "${input}")"
+}
+
+function log() {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  local -r script_name="$(basename "$0")"
+  local color
+  case "$level" in
+  INFO)
+    color="string_green"
+    ;;
+  WARN)
+    color="string_yellow"
+    ;;
+  ERROR)
+    color="string_red"
+    ;;
+  esac
+  echo >&2 -e "$(${color} "${timestamp} [${level}] ==>") $(string_blue "[$script_name]") ${message}"
+}
+function log_info() {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+function log_warn() {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+function log_error() {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function assert_not_empty() {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+  local -r reason="$3"
+  if [[ -z "$arg_value" ]]; then
+    log_error "'$arg_name' cannot be empty. $reason"
+    exit 1
+  fi
+  log_info "'$arg_name' -> $arg_value"
+}
+function create_debian_profile(){
+  if ! lxc storage show debian_privileged > /dev/null 2>&1 ;then
+    log_info "creating debian_privileged storage pool"
+    lxc storage create debian_privileged dir > /dev/null 2>&1
+  fi
+  if ! lxc profile show debian_privileged > /dev/null 2>&1 ;then
+    log_info "creating debian_privileged profile"
+    lxc profile create debian_privileged > /dev/null 2>&1 
+    cat << EOF | lxc profile edit debian_privileged
+name: debian_privileged
+config:
+  boot.autostart: "true"
+  linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
+  raw.lxc: |
+    lxc.apparmor.profile=unconfined
+    lxc.mount.auto=proc:rw sys:rw cgroup:rw
+    lxc.cgroup.devices.allow=a
+    lxc.cap.drop=
+  security.nesting: "true"
+  security.privileged: "true"
+description: "LXD profile for Kubernetes"
+devices:
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: lxdbr0
+    type: nic
+  root:
+    path: /
+    pool: debian_privileged
+    type: disk
+  aadisable:
+    path: /sys/module/nf_conntrack/parameters/hashsize
+    source: /sys/module/nf_conntrack/parameters/hashsize
+    type: disk
+  aadisable1:
+    path: /sys/module/apparmor/parameters/enabled
+    source: /dev/null
+    type: disk
+  aadisable2:
+    path: /dev/kmsg
+    source: /dev/kmsg
+    type: disk
+  aadisable3:
+    path: /sys/fs/bpf
+    source: /sys/fs/bpf
+    type: disk
+EOF
+  fi
+}
+function launch_debian() {
+	local -r container_name="$1"
+  log_info "launching container '$container_name'"
+	lxc launch images:debian/buster "${container_name}" --profile=debian_privileged || lxc start "${container_name}"
+}
+function provision_base(){
+	local -r container_name="$1"
+	local -r username="$2"
+  log_info "'$container_name' container : installing base dependencies"
+	cat << EOF | lxc exec "${container_name}" -- bash --
+apt-get update
+apt-get install -yqq sudo apt-utils curl wget ca-certificates gnupg2 git jq openssh-server
+EOF
+  log_info "'$container_name' container : creating user '$username' with password '$username'"
+	cat << EOF | lxc exec "${container_name}" -- bash --
+useradd -l -G sudo -md /home/${username} -s /bin/bash ${username}
+echo "${username}:${username}" | chpasswd
+echo "root:root" | chpasswd
+EOF
+  log_info "'$container_name' container : making sure all users belonging to sudo group can call 'sudo' without needing to input password"
+	cat << EOF | lxc exec "${container_name}" -- bash --
+sed -i.bak -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' /etc/sudoers
+EOF
+  log_info "'$container_name' container : setting up openssh"
+	cat << EOF | lxc exec "${container_name}" -- bash --
+sed -i '/.*PasswordAuthentication.*/d' /etc/ssh/sshd_config
+sed -i '/.*PermitRootLogin.*/d' /etc/ssh/sshd_config
+echo 'PasswordAuthentication yes' | tee -a /etc/ssh/sshd_config > /dev/null
+echo "PermitRootLogin no" | tee -a /etc/ssh/sshd_config > /dev/null
+systemctl restart ssh sshd
+systemctl status ssh sshd
+EOF
+#   log_info "'$container_name' container : redirecting all connections on eth0 to localhost"
+# 	cat << EOF | lxc exec "${container_name}" -- bash --
+# sysctl -w net.ipv4.conf.eth0.route_localnet=1
+# EOF
+}
+function ssh_config(){
+  local -r container_name="$1"
+	local -r username="$2"
+  log_info "removing all existing keys generated for '$container_name' on host"
+	rm -f ~/.ssh/${container_name}_id_rsa*
+  log_info "generating a new set of ssh keys for '$container_name' on host"
+	ssh-keygen -b 4096 -t rsa -f ~/.ssh/${container_name}_id_rsa -q -N ""
+	ip=$(lxc list --format json | jq -r ".[] | select((.name==\"${container_name}\") and (.status==\"Running\"))" | jq -r '.state.network.eth0.addresses' | jq -r '.[] | select(.family=="inet").address')
+  log_info "'$container_name' IP detected : $ip. copying ssh key"
+	echo "${username}" | sshpass \
+	  ssh-copy-id \
+	  -i "/home/${username}/.ssh/${container_name}_id_rsa" \
+	  -o UserKnownHostsFile=/dev/null \
+	  -o CheckHostIP=no \
+	  -o IdentitiesOnly=yes \
+	  -o StrictHostKeyChecking=no \
+	  -f "${username}@${ip}"
+  log_info "removing existing '$container_name' config from ~/.ssh/config"
+	sed -n -i "/${container_name}/,/UserKnownHostsFile/!{//!p}" ~/.ssh/config || true
+  log_info "storing ssh config for '$container_name' in ~/.ssh/config"
+	cat << EOF | tee -a ~/.ssh/config > /dev/null
+Host ${container_name}
+    HostName ${ip}
+    User ${username}
+    IdentityFile ~/.ssh/${container_name}_id_rsa
+    IdentitiesOnly yes
+    StrictHostKeyChecking no
+    CheckHostIP no
+    UserKnownHostsFile /dev/null
+EOF
+}
+function provision_git(){
+	local -r container_name="$1"
+#	local -r GITHUB_ACTOR="$2"
+#	local -r GITHUB_EMAIL="$3"
+#	local -r GITHUB_TOKEN="$4"
+log_info "'$container_name' container : making sure needed variables for configuring git are present"
+while [ -z "${GITHUB_ACTOR+x}" ] ; do
+  printf "\n❗ The GITHUB_ACTOR environment variable is required. Please enter its value.\n" &&
+  read -s -p "GITHUB_ACTOR: " GITHUB_ACTOR ;
+done ; export GITHUB_ACTOR="$GITHUB_ACTOR" && printf "\n'GITHUB_ACTOR' environment variable was set successfully\n";
+while [ -z "${GITHUB_TOKEN+x}" ] ; do
+  printf "\n❗ The GITHUB_TOKEN environment variable is required. Please enter its value.\n" &&
+  read -s -p "GITHUB_TOKEN: " GITHUB_TOKEN ;
+done ; export GITHUB_TOKEN="$GITHUB_TOKEN" && printf "\n'GITHUB_TOKEN' environment variable was set successfully\n";
+while [ -z "${GITHUB_EMAIL+x}" ] ; do
+  printf "\n❗ The GITHUB_EMAIL environment variable is required. Please enter its value.\n" &&
+  read -s -p "GITHUB_EMAIL: " GITHUB_EMAIL ;
+done ; export GITHUB_EMAIL="$GITHUB_EMAIL" && printf "\n'GITHUB_EMAIL' environment variable was set successfully\n";
+	# [NOTE] => configuring git
+log_info "'$container_name' container : configuring git"
+	ssh -q "${container_name}" << ENDSSH
+	git config --global credential.helper store
+	git config --global user.name '${GITHUB_ACTOR}'
+	git config --global user.email '${GITHUB_EMAIL}'
+	echo 'https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com' | tee ~/.git-credentials > /dev/null
+ENDSSH
+log_info "'$container_name' container : installing github cli"
+cat << EOF | lxc exec "${container_name}" -- bash --
+rm -rf /tmp/gh
+mkdir -p /tmp/gh
+curl -sL https://api.github.com/repos/cli/cli/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("amd64") and contains("tar") and (contains("sha256") | not))).browser_download_url' | xargs -I {} \
+ wget --quiet --no-cache -O /tmp/gh/gh.tar.gz {} 
+tar \
+   -xzf /tmp/gh/gh.tar.gz \
+   -C /tmp/gh/ \
+   --strip-components=1
+sudo mv -f /tmp/gh/bin/gh /usr/local/bin/
+sudo mkdir -p /usr/local/share/man/man1
+sudo mv -f /tmp/gh/share/man/man1/* /usr/local/share/man/man1
+sudo chmod +x /usr/local/bin/gh
+gh --version
+rm -rf /tmp/gh
+EOF
+log_info "'$container_name' container : configuring github cli"
+ssh -q "${container_name}" << ENDSSH
+mkdir -p ~/.config/gh
+cat << _EOF_ | tee ~/.config/gh/config.yml > /dev/null
+git_protocol: https
+editor:
+prompt: enabled
+pager:
+aliases:
+   co: pr checkout
+   all: api user/repos
+   private: '!gh api user/repos | jq ".[] | select(.private == true) | .name" --raw-output'
+   public: '!gh api users/da-moon/repos | jq .[].name --raw-output'
+_EOF_
+ENDSSH
+}
+function provision_ripgrep(){
+	local -r container_name="$1"
+log_info "'$container_name' container : installing ripgrep"
+cat << EOF | lxc exec "${container_name}" -- bash --
+sudo apt-get update -qq
+sudo apt-get install -yqq curl jq wget \
+rm -rf /tmp/ripgrep*
+mkdir -p /tmp/ripgrep
+curl -sL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("x86_64") and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -O /tmp/ripgrep.tar.gz {}
+sudo tar \
+   -xvzf /tmp/ripgrep.tar.gz \
+   -C /tmp/ripgrep \
+   --strip-components=1 > /dev/null
+sudo mv /tmp/ripgrep/rg /usr/local/bin/rg
+sudo mv /tmp/ripgrep/complete/rg.bash  /etc/bash_completion.d/rg.bash
+sudo chmod +x /usr/local/bin/rg
+sudo rm -r /tmp/ripgrep*
+EOF
+}
+function provision_python(){
+	local -r container_name="$1"
+  log_info "'$container_name' container : installing python packages"
+cat << EOF | lxc exec "${container_name}" -- bash --
+sudo apt-get update -qq
+sudo apt-get install -yqq curl \
+  python python3 \
+  python-dev python3-dev \
+  python-setuptools python3-setuptools \
+  python-pip python3-pip
+EOF
+}
+function provision_rbenv(){
+	local -r container_name="$1"
+# [NOTE] => ruby install
+  log_info "'$container_name' container : ruby and rbenv dependencies"
+cat << EOF | lxc exec "${container_name}" -- bash --
+sudo apt-get update -qq
+sudo apt-get install -yqq \
+	git curl zlib1g-dev build-essential \
+	libssl-dev libreadline-dev libyaml-dev \
+	libsqlite3-dev sqlite3 libxml2-dev \
+	libxslt1-dev libcurl4-openssl-dev \
+	software-properties-common libffi-dev
+EOF
+  log_info "'$container_name' container : installing rbenv"
+ssh -q "${container_name}" << 'ENDSSH'
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+echo 'export PATH="$PATH:$HOME/.rbenv/bin"' >> ~/.profile
+# export PATH="$PATH:$HOME/.rbenv/bin"
+echo 'eval "$(rbenv init -)"' >> ~/.profile
+#rbenv init -
+ENDSSH
+  log_info "'$container_name' container : installing ruby-build plugin "
+ssh -q "${container_name}" << 'ENDSSH'
+git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+echo 'export PATH="$PATH:$HOME/.rbenv/plugins/ruby-build/bin"' >> ~/.profile
+# export PATH="$PATH:$HOME/.rbenv/plugins/ruby-build/bin"
+ENDSSH
+  log_info "'$container_name' container : installing ruby"
+ssh -q "${container_name}" << 'ENDSSH'
+rbenv install 2.7.2
+rbenv global 2.7.2
+# export PATH="$PATH:$HOME/.rbenv/shims/"
+ruby -v
+ENDSSH
+  log_info "'$container_name' container : installing bundler"
+ssh -q "${container_name}" << 'ENDSSH'
+gem install bundler
+rbenv rehash
+ENDSSH
+
+}
+function provision_goenv(){
+	local -r container_name="$1"
+# [NOTE] => go install
+  log_info "'$container_name' container : installing goenv"
+ssh -q "${container_name}" << 'ENDSSH'
+git clone https://github.com/syndbg/goenv.git ~/.goenv
+echo 'git -C ~/.goenv pull' >> ~/.profile
+echo 'export GOENV_ROOT="$HOME/.goenv"' >> ~/.profile
+echo 'export PATH="$PATH:$GOENV_ROOT/bin"' >> ~/.profile
+echo 'eval "$(goenv init -)"' >> ~/.profile
+echo 'export PATH="$PATH:$GOROOT/bin"' >> ~/.profile
+echo 'export PATH="$PATH:$GOPATH/bin"' >> ~/.profile
+# export GOENV_ROOT="$HOME/.goenv"
+# export PATH="$PATH:$GOENV_ROOT/bin"
+# eval "$(goenv init -)"
+# export PATH="$PATH:$GOROOT/bin"
+# export PATH="$PATH:$GOPATH/bin"
+ENDSSH
+  log_info "'$container_name' container : installing go"
+ssh -q "${container_name}" << 'ENDSSH'
+goenv install 1.15.5
+goenv global 1.15.5
+go version
+ENDSSH
+}
+function provision_docker(){
+	local -r container_name="$1"
+# [NOTE] => docker install
+  log_info "'$container_name' container : adding docker sources"
+cat << EOF | lxc exec "${container_name}" -- bash --
+echo "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - > /dev/null
+EOF
+  log_info "'$container_name' container : installing docker"
+cat << EOF | lxc exec "${container_name}" -- bash --
+sudo apt-get update -qq
+sudo apt-get install -yqq docker-ce docker-ce-cli containerd.io
+EOF
+  log_info "'$container_name' container : installing docker-compose"
+cat << EOF | lxc exec "${container_name}" -- bash --
+curl -sL https://api.github.com/repos/docker/compose/releases/latest | jq -r ".assets[]|select(.browser_download_url | contains(\"$(uname -s)\") and contains(\"$(uname -m)\") and contains(\"x86_64\") and (contains(\"sha256\")|not)).browser_download_url" | \
+xargs -I {} sudo wget -O /usr/local/bin/docker-compose {}
+sudo chmod +x /usr/local/bin/docker-compose
+EOF
+ssh -q "${container_name}" << 'ENDSSH'
+sudo usermod -aG docker "`whoami`"
+ENDSSH
+}
+function provision_spacevim(){
+	local -r container_name="$1"
+	local -r username="$2"
+# [NOTE] => spacevim install
+  log_info "'$container_name' container : installing node and yarn"
+cat << EOF | lxc exec "${container_name}" -- bash --
+curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - > /dev/null && \
+ echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list > /dev/null
+wget -qO- https://deb.nodesource.com/setup_12.x | sudo bash - > /dev/null
+sudo apt-get install -yqq nodejs yarn
+sudo python3 -m pip install --upgrade pynvim notedown
+EOF
+  log_info "'$container_name' container : installing vim and neovim"
+cat << EOF | lxc exec "${container_name}" -- bash --
+sudo apt-get install -yqq neovim python-neovim python3-neovim vim-gtk
+EOF
+  log_info "'$container_name' container : installing npm packages spacevim needs"
+cat << EOF | lxc exec "${container_name}" -- bash --
+sudo yarn global add remark remark-cli remark-stringify remark-frontmatter wcwidth
+EOF
+  log_info "'$container_name' container : installing and configuring spacevim for default user"
+ssh -q "${container_name}" << ENDSSH
+curl -sLf https://spacevim.org/install.sh | bash
+mkdir -p ~/.SpaceVim.d
+cat << _EOF_ | tee ~/.SpaceVim.d/init.toml > /dev/null
+[[custom_plugins]]
+    repo = "chr4/nginx.vim"
+    merged = false
+
+[[custom_plugins]]
+    repo = "hashivim/vim-hashicorp-tools"
+    merged = false
+
+[[custom_plugins]]
+  repo = "jvirtanen/vim-hcl"
+  merged = false
+
+[[layers]]
+name = 'autocomplete'
+auto_completion_return_key_behavior = "complete"
+auto_completion_tab_key_behavior = "smart"
+
+[[layers]]
+name = 'shell'
+default_position = 'top'
+default_height = 30
+
+[[layers]]
+  name = "colorscheme"
+
+[[layers]]
+  name = "tools"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/format/
+  name = "format"
+  format_on_save = true
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/ui/
+  name = "ui"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/git/
+  name = "git"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/github/
+  name = "github"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/sudo/
+  name = "sudo"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/sh/
+  name = "lang#sh"
+
+[[layers]]
+  name = "lang#toml"
+
+[[layers]]
+  name = "lang#xml"
+
+[[layers]]
+  name = "lang#WebAssembly"
+
+[[layers]]
+  name = "lang#vue"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/vim/
+  name = "lang#vim"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/lua/
+  name = "lang#lua"
+
+[[layers]]
+  name = "lang#dockerfile"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/gosu/
+  name = "lang#gosu"
+
+# sudo yarn global add --prefix /usr/local remark remark-cli remark-stringify remark-frontmatter wcwidth 
+[[layers]]
+  name = "lang#markdown"
+
+## sudo yarn global add --prefix /usr/local typescript
+#[[layers]]
+#  # [REF] => https://spacevim.org/layers/lang/typescript/
+#  name = "lang#typescript"
+
+# go get -u github.com/jstemmer/gotags
+[[layers]]
+  name = "lang#go"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/c/
+  name = "lang#c"
+  clang_executable = "/usr/bin/clang"
+  clang_flag = ['-I/user/include']
+  [layer.clang_std]
+    c = "c11"
+    cpp = "c++1z"
+    objc = "c11"
+    objcpp = "c++1z"
+
+# gem install rubocop
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/ruby/
+  name = "lang#ruby"
+
+# python3 -m pip install pylint yapf isort coverage
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/python/
+  name = "lang#python"
+  python_file_head = [
+    '#!/usr/bin/env python',
+    '# -*- coding: utf-8 -*-',
+    '',
+    ''
+  ]
+  format_on_save = true
+  # [NOTE] => can slow things down
+  enable_typeinfo = true
+
+# python3 -m pip install notedown
+[[layers]]
+  # [REF] => https://spacevim.org/layers/lang/ipynb/
+  name = "lang#ipynb"
+
+[[layers]]
+  # [REF] => https://spacevim.org/layers/core/statusline/
+  name = "core#statusline"
+
+[options]
+  #colorscheme = "gruvbox"
+  colorscheme = "NeoSolarized"
+  colorscheme_bg = "dark"
+  enable_guicolors = true
+  statusline_separator = "arrow"
+  statusline_iseparator = "arrow"
+  buffer_index_type = 4
+  enable_tabline_filetype_icon = true
+  enable_statusline_mode = false
+  filemanager = "nerdtree"
+  # [Start] => Statusline
+  # options for statusline
+  # Set the statusline separators of statusline, default is "arrow"
+  statusline_separator = "arrow"
+  # Set the statusline separators of inactive statusline
+  statusline_iseparator = "bar"
+  # Set SpaceVim buffer index type
+  buffer_index_type = 4
+  # 0: 1 ➛ ➊
+  # 1: 1 ➛ ➀
+  # 2: 1 ➛ ⓵
+  # 3: 1 ➛ ¹
+  # 4: 1 ➛ 1
+  # Enable/Disable show mode on statusline
+  enable_statusline_mode = true
+  # left sections of statusline
+  statusline_left_sections = [
+    'winnr',
+    'major mode',
+    'filename',
+    'fileformat',
+    'minor mode lighters',
+    'version control info',
+    'search status'
+  ]
+  # right sections of statusline
+  statusline_right_sections = [
+    'cursorpos',
+    'percentage',
+    'input method',
+    'date',
+    'time'
+  ]
+  # [END] => Statusline
+_EOF_
+ENDSSH
+  log_info "'$container_name' container : installing and configuring spacevim for root"
+cat << EOF | lxc exec "${container_name}" -- bash --
+sudo -H python3 -m pip install notedown
+curl -sLf https://spacevim.org/install.sh | bash
+mkdir -p ~/.SpaceVim.d
+cp "/home/${username}/.SpaceVim.d/init.toml" /root/.SpaceVim.d/
+EOF
+}
+function provision_starship(){
+	local -r container_name="$1"
+  log_info "'$container_name' container : installing starship"
+	ssh -q "${container_name}" << 'ENDSSH'
+  curl -fsSL https://starship.rs/install.sh | sudo bash -s -- --force
+  echo 'eval "$(starship init bash)"' | tee -a ~/.bashrc > /dev/null
+  echo 'eval "$(starship init bash)"' | sudo tee -a /root/.bashrc > /dev/null
+  echo '[ -r $HOME/.bashrc ] && . $HOME/.bashrc' | sudo tee -a /root/.bashrc > /dev/null
+ENDSSH
+}
+function provision_nushell(){
+	local -r container_name="$1"
+  log_info "'$container_name' container : installing nushell"
+	ssh -q "${container_name}" << 'ENDSSH'
+  sudo apt-get update -qq > /dev/null 2>&1
+  sudo apt-get install libssl-dev -yqq > /dev/null 2>&1
+  rm -rf /tmp/nushell
+  mkdir -p /tmp/nushell
+  curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
+  tar \
+      -xzf /tmp/nushell/nushell.tar.gz \
+      -C /tmp/nushell \
+      --strip-components=2
+  rm -rf /tmp/nushell/nushell.tar.gz
+  sudo mv /tmp/nushell/nu* /usr/local/bin/
+  rm -rf /tmp/nushell
+ENDSSH
+}
+function help() {
+  echo
+  echo "Usage: [$(basename "$0")] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
+  echo
+  echo
+  echo -e "[Synopsis]:\tstarts and provisions lxd container"
+  echo
+  echo "Required Flags:"
+  echo
+  echo -e "  --name\t\tcontainer name."
+  echo
+  echo
+  echo "Optional Flags:"
+  echo
+  echo -e "  --ssh-config\t\tgenerates a new set of ssh key to connect to container, copies them and sets up ssh-config.Default:'false'"
+  echo -e "  --git\t\t\tinstalls and configures git and github-cli.Default:'false'"
+  echo -e "  --nu\t\t\tinstall nushell.Default:'false'"
+  echo -e "  --starship\t\tinstall starship prompt.Default:'false'"
+  echo -e "  --rg\t\t\tinstall ripgrep.Default:'false'"
+  echo -e "  --spacevim\t\tinstall and configures spacevim.Default:'false'"
+  echo -e "  --goenv\t\tinstall goenv and go toolchain.Default:'false'"
+  echo -e "  --rbenv\t\tinstall rbenv and ruby toolchain.Default:'false'"
+  echo -e "  --python\t\tinstall python.Default:'false'"
+  echo -e "  --docker\t\tinstalls docker and docker-compose.make sure container is privileged.Default:'false'"
+  echo -e "  --username\t\tdefault user to create inside the container.Default:'$USER'"
+  echo -e "  --distro\t\tcontainer distro.Supported Values: 'debian'.Default:'debian'"
+  echo
+  echo "Example:"
+  echo
+  echo "  "$0" \\"
+  echo "      --name 'default' \\"
+  echo "      --ssh-config \\"
+  echo "      --docker \\"
+  echo "      --nu \\"
+  echo "      --starship \\"
+  echo "      --git \\"
+  echo "      --python \\"
+  echo "      --rg \\"
+	echo "      --spacevim"
+  echo
+  echo
+  echo "  "$0" \\"
+  echo "      --name 'full' \\"
+  echo "      --ssh-config \\"
+  echo "      --docker \\"
+  echo "      --nu \\"
+  echo "      --starship \\"
+  echo "      --git \\"
+  echo "      --python \\"
+  echo "      --goenv \\"
+  echo "      --rbenv \\"
+  echo "      --rg \\"
+	echo "      --spacevim"
+  echo
+}
+function main() {
+  if [[ $# == 0 ]]; then
+    help
+    exit
+  fi
+  if ! command -v "lxc" >/dev/null ; then
+    log_error "'lxc' was not found in PATH"
+    return 1
+  fi
+  if ! command -v "jq" >/dev/null ; then
+    log_error "'jq' was not found in PATH"
+    return 1
+  fi
+  if ! command -v "sshpass" >/dev/null ; then
+    log_error "'sshpass' was not found in PATH"
+    return 1
+  fi
+  local CONTAINER_NAME
+  local USERNAME="$USER"
+  local PRIVILEGED=false
+  local SSH_CONFIG=false
+  local GIT=false
+  local RG=false
+  local SPACEVIM=false
+  local GOENV=false
+  local RBENV=false
+  local PYTHON=false
+  local DOCKER=false
+  local STARSHIP=false
+  local NU=false
+  local DISTRO='debian'
+  while [[ $# -gt 0 ]]; do
+    local key="$1"
+    case "$key" in
+      --name)
+        CONTAINER_NAME="$2"
+        shift
+      ;;
+      --username)
+        USERNAME="$2"
+        shift
+      ;;
+      --distro)
+        DISTRO="$2"
+        shift
+      ;;
+      --ssh-config)
+        SSH_CONFIG=true
+      ;;
+      --git)
+        GIT=true
+      ;;
+      --nu)
+        NU=true
+      ;;
+      --starship)
+        STARSHIP=true
+      ;;
+      --rg)
+        RG=true
+      ;;
+      --spacevim)
+        SPACEVIM=true
+      ;;
+      --goenv)
+        GOENV=true
+      ;;
+      --rbenv)
+        RBENV=true
+      ;;
+      --python)
+        PYTHON=true
+      ;;
+      --docker)
+        DOCKER=true
+      ;;
+      *)
+        help
+        exit 1
+      ;;
+    esac
+    shift
+  done
+  assert_not_empty "CONTAINER_NAME" "$CONTAINER_NAME" "required variable."
+  assert_not_empty "USERNAME" "$USERNAME" "required variable."
+  assert_not_empty "SSH_CONFIG" "$SSH_CONFIG" "required variable."
+  assert_not_empty "GIT" "$GIT" "required variable."
+  assert_not_empty "RG" "$RG" "required variable."
+  assert_not_empty "SPACEVIM" "$SPACEVIM" "required variable."
+  assert_not_empty "GOENV" "$GOENV" "required variable."
+  assert_not_empty "RBENV" "$RBENV" "required variable."
+  assert_not_empty "PYTHON" "$PYTHON" "required variable."
+  assert_not_empty "DOCKER" "$DOCKER" "required variable."
+  assert_not_empty "STARSHIP" "$STARSHIP" "required variable."
+  assert_not_empty "NU" "$NU" "required variable."
+  assert_not_empty "DISTRO" "$DISTRO" "required variable."
+  create_debian_profile
+  launch_debian "$CONTAINER_NAME" "$USERNAME" || true
+  provision_base "$CONTAINER_NAME" "$USERNAME"
+  if [ "$SSH_CONFIG" = true ] ; then
+    ssh_config "$CONTAINER_NAME" "$USERNAME"
+  fi
+  if [ "$GIT" = true ] ; then
+    provision_git "$CONTAINER_NAME"
+  fi
+  if [ "$NU" = true ] ; then
+    provision_nushell "$CONTAINER_NAME"
+  fi
+  if [ "$STARSHIP" = true ] ; then
+    provision_starship "$CONTAINER_NAME"
+#    if [ "$NU" = true ] ; then
+#    	ssh -q "${container_name}" << 'ENDSSH'
+#nu << 'EOF'
+#config set prompt "echo $(STARSHIP_SHELL= starship prompt)"
+#EOF
+#ENDSSH
+#    fi 
+  fi
+  if [ "$RG" = true ] ; then
+    provision_ripgrep "$CONTAINER_NAME"
+  fi
+  if [ "$PYTHON" = true ] ; then
+    provision_python "$CONTAINER_NAME"
+  fi
+  if [ "$RBENV" = true ] ; then
+    provision_rbenv "$CONTAINER_NAME"
+  fi
+  if [ "$GOENV" = true ] ; then
+    provision_goenv "$CONTAINER_NAME"
+  fi
+  if [ "$DOCKER" = true ] ; then
+    provision_docker "$CONTAINER_NAME"
+  fi
+  if [ "$SPACEVIM" = true ] ; then
+    provision_spacevim "$CONTAINER_NAME" "$USERNAME"
+  fi
+  exit $?
+}
+if [ -z "${BASH_SOURCE+x}" ]; then
+  main "${@}"
+  exit $?
+else
+  if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "${@}"
+    exit $?
+  fi
+fi
+
