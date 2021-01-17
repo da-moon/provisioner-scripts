@@ -22,7 +22,7 @@ if [ -n "$(command -v apt-get)" ]; then
   sudo apt-get install -yqq \
     apt-utils net-tools lsof apt-transport-https \
     curl gnupg2 tree jq gnupg2 ntp htop sshpass \
-    ufw dstat bash-completion unzip unrar zip iperf perl \
+    ufw dstat bash-completion unzip zip iperf perl \
     software-properties-common netcat progress \
     sysstat make build-essential rsync ca-certificates git \
     lsb-release aria2 xfonts-utils tmate ncdu neofetch >/dev/null 2>&1
