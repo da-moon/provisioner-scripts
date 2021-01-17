@@ -47,10 +47,8 @@ else
     xargs -I {} sudo wget --quiet --no-cache -O /usr/local/bin/docker-compose {}
   sudo chmod +x /usr/local/bin/docker-compose 
 fi
-sudo usermod -aG docker "$(id -u)"
-cat << EOF | sudo -H -u "$(id -u)" -- /bin/bash
+sudo usermod -aG docker "$(whoami)"
 newgrp docker <<_EOF_
 docker run --rm hello-world >/dev/null 2>&1
 _EOF_
-EOF
 

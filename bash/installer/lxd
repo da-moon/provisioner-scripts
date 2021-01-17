@@ -28,7 +28,7 @@ if [ ! $(which snap) ]; then
 	exit 1
 fi
 getent group lxd > /dev/null || sudo groupadd lxd
-sudo usermod --append --groups lxd "$(id -u)"
+sudo usermod --append --groups lxd "$(whoami)"
 if [ ! -n "$(command -v lxc)" ]; then
   sudo snap install core >/dev/null 2>&1 || true
   sudo snap install lxd >/dev/null 2>&1 || true

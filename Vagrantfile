@@ -48,7 +48,7 @@ Vagrant.configure("2") do |config|
   # => forward lxd port
   override.vm.network "forwarded_port", guest: 8443, host: 8443,auto_correct: true
   # downloading helper executable scripts
-  config.vm.provision "shell",privileged:false,name:"cleanup", inline: <<-SCRIPT
+  config.vm.provision "shell",privileged:false,name:"utilities", inline: <<-SCRIPT
   [ -r /usr/local/bin/disable-ssh-password-login ] || \
     sudo curl -s \
     -o /usr/local/bin/disable-ssh-password-login \
