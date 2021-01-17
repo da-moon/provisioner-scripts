@@ -56,7 +56,10 @@ extensions=(
 "wayou.vscode-todo-highlight"
 "DavidAnson.vscode-markdownlint"
 )
+if [ ! $(which code) ]; then
+	echo 'Please install "visual studio code"' 1>&2
+	exit 1
+fi
 for i in "${extensions[@]}";do 
   code --install-extension "$i"
 done
-
