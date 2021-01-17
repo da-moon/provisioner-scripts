@@ -9,7 +9,7 @@ if [ ! $(which sudo) ]; then
 	echo 'Please install "sudo" package' 1>&2
 	exit 1
 fi
-if [[ $EUID -e 0 ]]; then
+if [[ $EUID -eq 0 ]]; then
    echo "You must run this script as non-root user with sudo permission." 1>&2
    exit 1
 fi
