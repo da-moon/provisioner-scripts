@@ -6,22 +6,49 @@ set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 if [ ! $(which sudo) ]; then
-	echo 'Please install "sudo" package'
+	echo 'Please install "sudo" package' 1>&2
 	exit 1
 fi
-# passwordless sudo
-sudo sed -i.bak -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' /etc/sudoers
+if [[ $EUID -e 0 ]]; then
+   echo "You must run this script as non-root user with sudo permission." 1>&2
+   exit 1
+fi
 if [ -n "$(command -v apt-get)" ]; then
-  echo "*** Detected Debian based Linux"
+  echo "*** Detected Debian based Linux" 1>&2
   export DEBIAN_FRONTEND=noninteractive
+  # passwordless sudo
+  sudo sed -i.bak -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' /etc/sudoers
   sudo apt-get update -qq > /dev/null 2>&1
   sudo apt-get install -yqq \
     apt-utils net-tools lsof apt-transport-https \
     curl gnupg2 tree jq gnupg2 ntp htop sshpass \
-    ufw dstat bash-completion unzip zip iperf \
-    software-properties-common netcat lsof \
+    ufw dstat bash-completion unzip unrar zip iperf perl \
+    software-properties-common netcat progress \
     sysstat make build-essential rsync ca-certificates git \
     lsb-release aria2 xfonts-utils tmate ncdu neofetch >/dev/null 2>&1
+fi
+if [ -n "$(command -v pacman)" ]; then
+  echo "*** Detected Arch based Linux" 1>&2
+  sudo sed -i -e '/%wheel\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/d' /etc/sudoers
+  sudo sed -i -e '/%wheel.*NOPASSWD:ALL/d' /etc/sudoers
+  cat << EOF | sudo tee -a /etc/sudoers > /dev/null
+%wheel ALL=(ALL) ALL
+%wheel ALL=(ALL) NOPASSWD: ALL
+EOF
+  sudo locale-gen en_US.UTF-8
+  sudo pacman --noconfirm -Syyu
+  sudo pacman --noconfirm --needed -Sy \
+    base-devel git sshpass unzip unrar \
+    rxvt-unicode rsync wget curl \
+    aria2 axel jq ufw rclone parallel tmux \
+    lsof progress perl
+  sudo rm -rf /tmp/paru
+  git clone https://aur.archlinux.org/paru.git /tmp/paru
+  pushd /tmp/paru
+  makepkg --noconfirm -sic
+  paru --version
+  popd
+  sudo rm -r /tmp/paru
 fi
 sudo sed -i -e '/net.ipv4.ip_forward=/d' /etc/sysctl.conf > /dev/null
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf > /dev/null

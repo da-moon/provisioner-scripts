@@ -6,35 +6,49 @@ set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 if [ ! $(which sudo) ]; then
-	echo 'Please install "sudo" package'
+	echo 'Please install "sudo" package' 1>&2
 	exit 1
 fi
-if [ -n "$(command -v apt-get)" ]; then
-  echo "*** Detected Debian based Linux"
-  export DEBIAN_FRONTEND=noninteractive
-  sudo apt-get update -qq > /dev/null 2>&1
-  sudo apt-get install -yqq git > /dev/null 2>&1
+if [[ $EUID -e 0 ]]; then
+   echo "You must run this script as non-root user with sudo permission." 1>&2
+   exit 1
 fi
-if [ -n "$(command -v goenv)" ]; then
-  echo "*** goenv is already installed"
+if [ -n "$(command -v paru)" ]; then
+  echo "*** Detected Arch based Linux" 1>&2
+  paru \
+  --needed \
+  --removemake \
+  --cleanafter \
+  --noconfirm \
+  -Sy goenv
 else
-  [ -r ~/.goenv ] || git clone https://github.com/syndbg/goenv.git ~/.goenv > /dev/null 2>&1
-  if ! grep -q "goenv" ~/.profile; then
-    echo 'git -C ~/.goenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
-    echo 'export GOENV_ROOT="$HOME/.goenv"' | tee -a ~/.profile > /dev/null
-    echo 'export PATH="$PATH:$GOENV_ROOT/bin"' | tee -a ~/.profile > /dev/null
-    echo 'eval "$(goenv init -)"' | tee -a ~/.profile > /dev/null
-    source ~/.profile
+  if [ -n "$(command -v apt-get)" ]; then
+    echo "*** Detected Debian based Linux" 1>&2
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update -qq > /dev/null 2>&1
+    sudo apt-get install -yqq git > /dev/null 2>&1
+  fi
+  if [ -n "$(command -v goenv)" ]; then
+    echo "*** goenv is already installed" 1>&2
+  else
+    [ -r ~/.goenv ] || git clone https://github.com/syndbg/goenv.git ~/.goenv > /dev/null 2>&1
+    if ! grep -q "goenv" ~/.profile; then
+      echo 'git -C ~/.goenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
+      echo 'export GOENV_ROOT="$HOME/.goenv"' | tee -a ~/.profile > /dev/null
+      echo 'export PATH="$PATH:$GOENV_ROOT/bin"' | tee -a ~/.profile > /dev/null
+      echo 'eval "$(goenv init -)"' | tee -a ~/.profile > /dev/null
+      source ~/.profile
+    fi
   fi
 fi
 if [ -n "$(command -v go)" ]; then
-  echo "*** go is already installed"
+  echo "*** go is already installed" 1>&2
   exit 0
 else
   goenv install 1.15.5 || true
   goenv global 1.15.5 || true
-  echo 'export PATH="$PATH:$GOROOT/bin"' | tee -a ~/.profile > /dev/null
-  echo 'export PATH="$PATH:$GOPATH/bin"' | tee -a ~/.profile > /dev/null
+  echo 'export PATH="$PATH:$(go env GOROOT)/bin"' | tee -a ~/.profile > /dev/null
+  echo 'export PATH="$PATH:$(go env GOPATH)/bin"' | tee -a ~/.profile > /dev/null
   echo 'export GO111MODULE=on' | tee -a ~/.profile > /dev/null
   source ~/.profile
   go env > /dev/null && exit 0 || exit 1

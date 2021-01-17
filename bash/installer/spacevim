@@ -6,26 +6,38 @@ set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 if [ ! $(which sudo) ]; then
-	echo 'Please install "sudo" package'
+	echo 'Please install "sudo" package' 1>&2
 	exit 1
+fi
+if [[ $EUID -e 0 ]]; then
+   echo "You must run this script as non-root user with sudo permission." 1>&2
+   exit 1
 fi
 if [ ! $(which yarn) ]; then
 	echo 'Please install "yarn" package'
 	exit 1
 fi
-
 if [ ! $(which pip3) ]; then
 	echo 'Please install "pip3" package'
 	exit 1
 fi
 if [ -n "$(command -v apt-get)" ]; then
-  echo "*** Detected Debian based Linux"
+  echo "*** Detected Debian based Linux" 1>&2
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq >/dev/null 2>&1
   sudo apt-get -yqq install curl neovim python-neovim \
     python3-neovim vim-gtk >/dev/null 2>&1
 fi
-
+if [ -n "$(command -v paru)" ]; then
+  echo "*** Detected Arch based Linux" 1>&2
+  paru --needed --removemake \
+    --cleanafter --noconfirm \
+    -Sy gvim neovim python-pynvim curl xorg-font-utils
+fi
+if [ ! $(which curl) ]; then
+    echo 'Please install "curl" package' 1>&2
+    exit 1
+fi
 curl -sLf https://spacevim.org/install.sh | bash > /dev/null 2>&1
 curl -sLf https://spacevim.org/install.sh | sudo -H -s -u root bash -s > /dev/null 2>&1
 sudo python3 -m pip install --upgrade pynvim notedown > /dev/null 2>&1
@@ -211,4 +223,4 @@ default_height = 30
   # [END] => Statusline
 EOF
 sudo mkdir -p "/root/.SpaceVim.d"
-sudo cp "/home/${(id -u)}/.SpaceVim.d/init.toml" "/root/.SpaceVim.d/init.toml"
+sudo cp "/home/$(id -u)/.SpaceVim.d/init.toml" "/root/.SpaceVim.d/init.toml"

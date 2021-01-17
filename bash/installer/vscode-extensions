@@ -5,7 +5,14 @@ set -o errexit
 set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-export DEBIAN_FRONTEND=noninteractive
+if [ ! $(which code) ]; then
+	echo 'Please install "vscode" package'
+	exit 1
+fi
+if [[ $EUID -e 0 ]]; then
+   echo "You must run this script as non-root user with sudo permission." 1>&2
+   exit 1
+fi
 extensions=(
 "alefragnani.Bookmarks"
 "alefragnani.project-manager"
@@ -49,6 +56,7 @@ extensions=(
 "wayou.vscode-todo-highlight"
 "DavidAnson.vscode-markdownlint"
 )
+
 for i in "${extensions[@]}";do 
   code --install-extension "$i"
 done

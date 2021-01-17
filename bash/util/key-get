@@ -5,7 +5,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 if [ ! $(which sudo) ]; then
-	echo 'Please install "sudo" package'
+	echo 'Please install "sudo" package' 1>&2
 	exit 1
 fi
 echo "after adding sources, there may be missing keys.the following " > /dev/null

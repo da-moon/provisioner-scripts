@@ -6,8 +6,12 @@ set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 if [ ! $(which sudo) ]; then
-	echo 'Please install "sudo" package'
+	echo 'Please install "sudo" package' 1>&2
 	exit 1
+fi
+if [[ $EUID -e 0 ]]; then
+   echo "You must run this script as non-root user with sudo permission." 1>&2
+   exit 1
 fi
 if ! grep -q "local/bin" ~/.profile; then
   echo "export PATH=$PATH:$HOME/.local/bin" | tee -a ~/.profile > /dev/null
@@ -22,5 +26,14 @@ if [ -n "$(command -v apt-get)" ]; then
   sudo apt-get install -y python3-pip > /dev/null 2>&1
   sudo apt-get install -y python-setuptools python3-setuptools > /dev/null 2>&1
   sudo apt-get install -y virtualenv python3-venv > /dev/null 2>&1
+fi
+if [ -n "$(command -v paru)" ]; then
+  echo "*** Detected Arch based Linux" 1>&2
+  paru --needed --removemake --cleanafter --noconfirm -Sy python2 python
+  paru --needed --removemake --cleanafter --noconfirm -Sy python2-pip python-pip
+fi
+if [ ! $(which pip3) ]; then
+	echo 'Please install "pip3" package'
+	exit 1
 fi
 sudo python3 -m pip install yq > /dev/null 2>&1
