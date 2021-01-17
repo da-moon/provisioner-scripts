@@ -223,4 +223,4 @@ default_height = 30
   # [END] => Statusline
 EOF
 sudo mkdir -p "/root/.SpaceVim.d"
-sudo cp "/home/$(id -u)/.SpaceVim.d/init.toml" "/root/.SpaceVim.d/init.toml"
+sudo cp "/home/$(whoami)/.SpaceVim.d/init.toml" "/root/.SpaceVim.d/init.toml"
