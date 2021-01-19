@@ -1,4 +1,6 @@
 # this scripts turns off visual effects to adjust for best performance
+# turn off transparency
+Reg Add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v EnableTransparency /t REG_DWORD /d 0 /f
 # https://www.lifewire.com/adjust-visual-effects-to-improve-speed-3506867
 $path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects'
 try {
