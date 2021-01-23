@@ -1,11 +1,37 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+require 'getoptlong'
+# [ NOTE ] => https://github.com/EA31337/EA-Tester/blob/master/Vagrantfile
+opts = GetoptLong.new(
+  [ '--ubuntu',          GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--debian',          GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--arch',            GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--provider',        GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--vm-name',         GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--memory',          GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--cpus',            GetoptLong::OPTIONAL_ARGUMENT ],
+)
+box            = ENV['BOX']      || "generic/debian10"
+memory         = ENV['MEMORY']   || 4096
+cpus           = ENV['CPUS']     || 4
+provider       = ENV['PROVIDER'] || 'virtualbox'
+vm_name        = ENV['VM_NAME']  || File.basename(Dir.pwd)
 
-default_provider = ENV['VAGRANT_DEFAULT_PROVIDER'] || 'virtualbox'
-ENV['VAGRANT_DEFAULT_PROVIDER'] = default_provider
-NAME=ENV["VAGRANT_MACHINE_NAME"] || File.basename(Dir.pwd)
-MEMORY_LIMIT=ENV["MEMORY_LIMIT"] || 4096
-CORE_LIMIT=ENV["CORE_LIMIT"] || 4
+begin
+  opts.each do |opt, arg|
+    case opt
+      when '--ubuntu';          box            = "generic/ubuntu2010"
+      when '--debian';          box            = "generic/debian10"
+      when '--arch';            box            = "generic/arch"
+      when '--provider';        provider       = arg
+      when '--vm-name';         vm_name        = arg
+      when '--memory';          memory         = arg.to_i
+      when '--cpus';            cpus           = arg.to_i
+      end
+  end
+rescue
+end
+ENV['VAGRANT_DEFAULT_PROVIDER'] = provider
 $cleanup_script = <<-SCRIPT
 sudo apt-get autoremove -yqq --purge > /dev/null 2>&1
 sudo apt-get autoclean -yqq > /dev/null 2>&1
@@ -17,21 +43,21 @@ UTIL_SCRIPTS_BASE_URL="https://raw.githubusercontent.com/da-moon/provisioner-scr
 INSTALLER_SCRIPTS_BASE_PATH="bash/installer"
 UTIL_SCRIPTS_BASE_PATH="bash/util"
 Vagrant.configure("2") do |config|
-  config.vm.define "#{NAME}"
-  config.vm.hostname = "#{NAME}"
+  config.vm.define "#{vm_name}"
+  config.vm.hostname = "#{vm_name}"
   config.vagrant.plugins=["vagrant-vbguest"]
-  config.vm.synced_folder ".", "/vagrant/#{NAME}", disabled: true,auto_correct:true
+  config.vm.synced_folder ".", "/vagrant/#{vm_name}", disabled: true,auto_correct:true
+  config.vm.box = "#{box}"
   config.vm.provider "virtualbox" do |vb, override|
-    vb.memory = "#{MEMORY_LIMIT}"
-    vb.cpus   = "#{CORE_LIMIT}"
+    vb.memory = "#{memory}"
+    vb.cpus   = "#{cpus}"
     # => enable nested virtualization
     vb.customize [
                   "modifyvm",:id,
                   "--nested-hw-virt", "on",
                   # "--paravirtprovider", "kvm",
                 ]    
-    override.vm.box = "generic/debian10"
-    override.vm.synced_folder ".", "/vagrant/#{NAME}", owner: "vagrant",group: "vagrant", type: "virtualbox"
+    override.vm.synced_folder ".", "/vagrant/#{File.basename(Dir.pwd)}", owner: "vagrant",group: "vagrant", type: "virtualbox"
   end
   config.vm.provision "shell",privileged:false,name:"cleanup", inline: $cleanup_script
   config.vm.provision "shell",privileged:false,name:"init", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/init"
