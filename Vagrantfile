@@ -19,7 +19,7 @@ UTIL_SCRIPTS_BASE_PATH="bash/util"
 Vagrant.configure("2") do |config|
   config.vm.define "#{NAME}"
   config.vm.hostname = "#{NAME}"
-  config.vagrant.plugins=["vagrant-vbguest","vagrant-rsync-back"]
+  config.vagrant.plugins=["vagrant-vbguest"]
   config.vm.synced_folder ".", "/vagrant/#{NAME}", disabled: true,auto_correct:true
   config.vm.provider "virtualbox" do |vb, override|
     vb.memory = "#{MEMORY_LIMIT}"
@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
     # => enable nested virtualization
     vb.customize [
                   "modifyvm",:id,
-                  "--nested-hw-virt", "off",
+                  "--nested-hw-virt", "on",
                   # "--paravirtprovider", "kvm",
                 ]    
     override.vm.box = "generic/debian10"
@@ -43,10 +43,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell",privileged:false,name:"spacevim", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/spacevim"
   config.vm.provision "shell",privileged:false,name:"hashicorp", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/hashicorp"
   config.vm.provision "shell",privileged:false,name:"ripgrep", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/ripgrep"
-  override.vm.provision "shell",privileged:false,name:"docker", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/docker"
-  override.vm.provision "shell",privileged:false,name:"lxd", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/lxd"
+  config.vm.provision "shell",privileged:false,name:"docker", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/docker"
+  config.vm.provision "shell",privileged:false,name:"lxd", path: "#{INSTALLER_SCRIPTS_BASE_PATH}/lxd"
   # => forward lxd port
-  override.vm.network "forwarded_port", guest: 8443, host: 8443,auto_correct: true
+  config.vm.network "forwarded_port", guest: 8443, host: 8443,auto_correct: true
   # downloading helper executable scripts
   config.vm.provision "shell",privileged:false,name:"utilities", inline: <<-SCRIPT
   [ -r /usr/local/bin/disable-ssh-password-login ] || \
