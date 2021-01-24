@@ -31,7 +31,18 @@ cpus           = ENV[           'CPUS'         ]  || 4
 vm_name        = ENV[           'VM_NAME'      ]  || File.basename(Dir.pwd)
 provider       = ENV['VAGRANT_DEFAULT_PROVIDER']  || 'virtualbox'
 forwarded_ports= [8443]
-provisioners   = ["node","python","starship","nu","goenv","spacevim","hashicorp","ripgrep","docker","lxd"]
+provisioners   = [
+  "node",
+  "python",
+  "starship",
+  "nu",
+  "goenv",
+  "spacevim",
+  "hashicorp",
+  "ripgrep",
+  "docker",
+  "lxd",
+]
 utility_scripts= ["disable-ssh-password-login","clean-pkgs","key-get","lxd-debian","ngrok-init"]
 synced_folder  = OpenStruct.new
 begin
