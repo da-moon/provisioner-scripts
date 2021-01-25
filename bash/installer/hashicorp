@@ -58,11 +58,12 @@ case "$OSTYPE" in
   linux*)   platform="linux" ;;
   *)        echo 'unsupported platform' 1>&2 && exit 1 ;;
 esac
+arch="amd64"
 case "`uname -i`" in
-  x86_64|amd64) arch="amd64";;
+  # x86_64|amd64) arch="amd64";;
   i?86) arch="386";;
   arm64) arch="arm64";;
-  *)  echo 'unsupported cpu architecture' 1>&2 && exit 1 ;;
+  # *)  echo 'unsupported cpu architecture' 1>&2 && exit 1 ;;
 esac
 
 rm -rf /tmp/hashicorp

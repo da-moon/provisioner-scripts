@@ -40,6 +40,7 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "#{vm_name}"
   config.vm.synced_folder ".","#{synced_folder}",auto_correct:true, owner: "vagrant",group: "vagrant",disabled:true
   config.vagrant.plugins = [ "vagrant-vbguest" ]
+  config.vm.box = "generic/debian10"
   config.vm.provider "virtualbox" do |vb, override|
     vb.memory = "#{memory}"
     vb.cpus   = "#{cpus}"
@@ -48,6 +49,25 @@ Vagrant.configure("2") do |config|
     override.vm.synced_folder ".", "#{synced_folder}",disabled: false,
       auto_correct:true, owner: "vagrant",group: "vagrant",type: "virtualbox"
   end
+  # [ WARN ] => avoid hyper-v if you can. It is the worst hypervisor that I have worked with.
+  # it has horerendous memory/cpu management. it makes my on my surface book 3 ( 32 GB RAM ) model , which is 
+  # the flagship Microsoft laptop, slow as hell.
+  # [ REF ] => https://docs.microsoft.com/en-us/virtualization/community/team-blog/2017/20170706-vagrant-and-hyper-v-tips-and-tricks
+  config.vm.provider "hyperv" do |h,override|
+    h.enable_virtualization_extensions = true
+    h.linked_clone = true
+    h.cpus   = "#{cpus}"
+    # [ NOTE ] => https://github.com/hashicorp/vagrant/issues/10349#issuecomment-435185440
+    h.memory = "#{memory}"
+    h.maxmemory = "#{memory}"
+    override.vm.network "public_network"
+    override.vm.synced_folder ".", "#{synced_folder}",disabled: false,auto_correct:true, type: "smb",
+    owner: "vagrant",group: "vagrant"
+  end
+  # [ NOTE ] => use libvirt for the most optimized experience
+  # [ NOTE ] => use vagrant ( vagrant plugin install vagrant-libvirt )
+  # to install libvirt provider rather than package manager
+  # (sudo apt-get install vagrant-libvirt) to get the latest version.
   config.vm.provider "libvirt" do |libvirt,override|
     libvirt.memory = "#{memory}"
     libvirt.cpus = "#{cpus}"
