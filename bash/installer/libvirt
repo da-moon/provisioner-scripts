@@ -41,6 +41,17 @@ virtio
 9pnet
 9pnet_virtio
 EOF
+sudo sed -i \
+  -e '/user\s*=/d' \
+  -e '/group\s*=/d' \
+  -e '/dynamic_ownership\s*=/d' \
+  /etc/libvirt/qemu.conf
+cat << EOF | sudo tee -a /etc/libvirt/qemu.conf > /dev/null
+user = "$(id -u)"
+group = "$(id -g)"
+dynamic_ownership = 1
+EOF
+sudo systemctl restart libvirtd
 sudo usermod -aG "libvirt" $(whoami) || true
 sudo usermod -aG "libvirt-qemu" $(whoami) || true
 sudo usermod -aG "libvirt-dnsmasq" $(whoami) || true

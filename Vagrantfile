@@ -77,21 +77,7 @@ Vagrant.configure("2") do |config|
     # [ NOTE ] => ensuring vagrant user owns the folder
     override.vm.synced_folder ".", "#{synced_folder}", 
       disabled: false,auto_correct:true, owner: "1000", group: "1000",
-      type: "9p",  accessmode: "squash" 
-    if ! Vagrant::Util::Platform.windows?
-      override.trigger.before [:resume,:up,:reload] do |t|
-        t.info = "Ensuring the directory is world-writable so that guest can write in it."
-        t.run = {inline: "sudo chmod 777 #{ENV["PWD"]} -R"}
-      end
-      override.trigger.before [:suspend,:halt,:destroy] do |t|
-        t.info = "Returning ownership of synced directory directory back to '#{ENV["USER"]}''"
-        t.run = {inline: "sudo chown '#{ENV["USER"]}:#{ENV["GROUP"]}' #{ENV["PWD"]} -R"}
-      end
-      override.trigger.before [:suspend,:halt,:destroy] do |t|
-        t.info = "making sure synced directory is not world writable"
-        t.run = {inline: "sudo chmod 775 #{ENV["PWD"]} -R"}
-      end
-    end
+      type: "9p",  accessmode: "passthrough" 
   end if Vagrant.has_plugin?('vagrant-libvirt')
   forwarded_ports.each do |port|
     config.vm.network "forwarded_port", 
