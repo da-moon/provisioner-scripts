@@ -22,6 +22,7 @@ provisioners   = [
   # "pandoc",
   # "goenv",
   # "hashicorp",
+  # "tfenv",
 ]
 utility_scripts= [
   "disable-ssh-password-login",
@@ -73,11 +74,19 @@ Vagrant.configure("2") do |config|
     libvirt.cpus = "#{cpus}"
     libvirt.nested = true
     libvirt.cpu_mode = "host-passthrough"
+    libvirt.driver = "kvm"
     # [ NOTE ] => https://askubuntu.com/questions/772784/9p-libvirt-qemu-share-modes
     # [ NOTE ] => ensuring vagrant user owns the folder
     override.vm.synced_folder ".", "#{synced_folder}", 
       disabled: false,auto_correct:true, owner: "1000", group: "1000",
       type: "9p",  accessmode: "passthrough" 
+    override.vm.provision "shell",
+      privileged:true,
+      name:"p9-kernel-support",
+      inline: <<-SCRIPT
+      [ ! -L /usr/local/bin/modprobe ] && sudo ln -s /sbin/modprobe /usr/local/bin/modprobe
+    SCRIPT
+
   end if Vagrant.has_plugin?('vagrant-libvirt')
   forwarded_ports.each do |port|
     config.vm.network "forwarded_port", 
