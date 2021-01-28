@@ -74,10 +74,11 @@ function main() {
       fi
     fi
   fi
+  source ~/.bashrc
   tfenv install ${VERSION} || true
   tfenv use ${VERSION} || true
-  if ! grep -q "terraform" ~/.bash_aliases; then
-  cat << EOF | tee -a ~/.bash_aliases > /dev/null
+  if ! grep -q "terraform" ~/.bashrc; then
+  cat << EOF | tee -a ~/.bashrc > /dev/null
 alias tf="terraform"
 alias tfi="terraform init"
 alias tfa="terraform apply -auto-approve"
