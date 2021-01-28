@@ -65,27 +65,26 @@ function main() {
       echo "*** tfenv is already installed" 1>&2
     else
       [ -r ~/.tfenv ] || git clone https://github.com/tfutils/tfenv.git ~/.tfenv > /dev/null 2>&1
-      if ! grep -q "tfenv" ~/.bashrc; then
-        echo '' | tee -a ~/.bashrc > /dev/null
-        echo 'git -C ~/.tfenv pull > /dev/null 2>&1' | tee -a ~/.bashrc > /dev/null
-        echo 'export tfenv_ROOT="$HOME/.tfenv"' | tee -a ~/.bashrc > /dev/null
-        echo 'export PATH="$PATH:$tfenv_ROOT/bin"' | tee -a ~/.bashrc > /dev/null
-        source ~/.bashrc
+      if ! grep -q "tfenv" ~/.profile; then
+        echo '' | tee -a ~/.profile > /dev/null
+        echo 'git -C ~/.tfenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
+        echo 'export tfenv_ROOT="$HOME/.tfenv"' | tee -a ~/.profile > /dev/null
+        echo 'export PATH="$PATH:$tfenv_ROOT/bin"' | tee -a ~/.profile > /dev/null
+        source ~/.profile
       fi
     fi
   fi
-  source ~/.bashrc
   tfenv install ${VERSION} || true
   tfenv use ${VERSION} || true
-  if ! grep -q "terraform" ~/.bashrc; then
-  cat << EOF | tee -a ~/.bashrc > /dev/null
+  if ! grep -q "terraform" ~/.profile; then
+  cat << EOF | tee -a ~/.profile > /dev/null
 alias tf="terraform"
 alias tfi="terraform init"
 alias tfa="terraform apply -auto-approve"
 alias tfd="terraform destroy -auto-approve"
 EOF
   fi
-  source ~/.bashrc
+  source ~/.profile
   terraform --version > /dev/null
   exit
 }
