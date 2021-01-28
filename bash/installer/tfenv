@@ -74,8 +74,8 @@ function main() {
       fi
     fi
   fi
-  tfenv install ${VERSION} || true
-  tfenv use ${VERSION} || true
+  tfenv install ${VERSION} > /dev/null 2>&1 || true
+  tfenv use ${VERSION} > /dev/null 2>&1 || true
   if ! grep -q "terraform" ~/.profile; then
   cat << EOF | tee -a ~/.profile > /dev/null
 alias tf="terraform"
