@@ -143,10 +143,9 @@ function main() {
       continue
       fi
     fi
-    cat << EOF >> download.txt
-  ${url}
-    out=${name}.zip
-EOF
+    echo "${url}" >>"/tmp/hashicorp/download.txt"
+    echo " dir=/tmp/hashicorp" >>"/tmp/hashicorp/download.txt"
+    echo " out=${name}.zip" >>"/tmp/hashicorp/download.txt"
   done
   aria2c \
     --optimize-concurrent-downloads \
@@ -155,7 +154,6 @@ EOF
     -x 16 \
     -c \
     --file-allocation=falloc \
-    --dir="/tmp/hashicorp" \
     -i "/tmp/hashicorp/download.txt"
   find . -mindepth 1 -maxdepth 1 -type f -name '*.zip' | xargs -I {} -P `nproc` unzip -qq {}
   rm *.zip
