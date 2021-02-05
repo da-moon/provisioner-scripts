@@ -23,10 +23,10 @@ fi
   if [ -n "$(command -v cargo)" ]; then
     echo "*** cargo is already installed" 1>&2
   else
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
-    -y \
-    --default-toolchain nightly \
-    --profile complete
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
+  -y \
+  --default-toolchain nightly \
+  --profile complete
     if ! grep -q "cargo" ~/.profile; then
       echo '[ -r $HOME/.cargo/env ] && . $HOME/.cargo/env' >> ~/.profile
       source ~/.profile
