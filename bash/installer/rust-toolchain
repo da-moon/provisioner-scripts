@@ -28,6 +28,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
     echo '[ -r $HOME/.cargo/env ] && . $HOME/.cargo/env' >> ~/.profile
     source ~/.profile
   fi
+source $HOME/.cargo/env
 rustup --version
 cargo --version
 rustc --version
