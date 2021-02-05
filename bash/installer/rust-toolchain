@@ -23,7 +23,7 @@ fi
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
 -y \
 --default-toolchain nightly \
---profile complete
+--profile default
   if ! grep -q "cargo" ~/.profile; then
     echo '[ -r $HOME/.cargo/env ] && . $HOME/.cargo/env' >> ~/.profile
     source ~/.profile
