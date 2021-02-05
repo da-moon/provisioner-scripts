@@ -25,7 +25,7 @@ fi
   else
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
     -y \
-    --default-toolchain "$(NIGHTLY_VERSION)" \
+    --default-toolchain nightly \
     --profile complete
     if ! grep -q "cargo" ~/.profile; then
       echo '[ -r $HOME/.cargo/env ] && . $HOME/.cargo/env' >> ~/.profile
@@ -35,12 +35,11 @@ fi
 rustup --version
 cargo --version
 rustc --version
+rustup update "$(NIGHTLY_VERSION)"
+rustup default "$(NIGHTLY_VERSION)"
 rustup completions bash | sudo tee /etc/bash_completion.d/rustup.bash-completion > /dev/null
-rustup toolchain uninstall stable
 rustup component add rust-src
 rustup component add rustfmt
 rustup component add rls
 rustup component add clippy
 cargo install -j $(nproc) cargo-watch cargo-cache cargo-tree systemfd petname tojson
-
-
