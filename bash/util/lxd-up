@@ -880,6 +880,7 @@ function main() {
   fi
   log_info "waiting for '$CONTAINER_NAME' to be ready"
   lxc exec "$CONTAINER_NAME" -- bash -c 'while [ "$(systemctl is-system-running 2>/dev/null)" != "running" ] && [ "$(systemctl is-system-running 2>/dev/null)" != "degraded" ]; do :; done'
+  sleep 20;
   provision_base "$CONTAINER_NAME" "$USERNAME"
   if [ "$SSH_CONFIG" = true ] ; then
     ssh_config "$CONTAINER_NAME" "$USERNAME"
