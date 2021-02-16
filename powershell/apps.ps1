@@ -92,7 +92,7 @@ Function InstallChocolatey {
 function InstallChocolateyPackages{
     info "Installing Requested Software With Chocolatey ..."
     foreach($app in $chocolatey_software) {
-        choco install  $app
+        choco install -y $app
     }
     success "Installing Requested Software With Chocolatey ..."
 }
@@ -118,7 +118,7 @@ if ((Get-Command "choco" -ErrorAction SilentlyContinue) -eq $null)
 	warn "Unable to find choco in your PATH"
 	info "installing chocolatey"
 	InstallChocolatey
-	choco feature enable -n allowGlobalConfirmation
 }
+choco feature enable -n allowGlobalConfirmation
 InstallScoopPackages
 InstallChocolateyPackages
