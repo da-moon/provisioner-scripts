@@ -118,6 +118,7 @@ if ((Get-Command "choco" -ErrorAction SilentlyContinue) -eq $null)
 	warn "Unable to find choco in your PATH"
 	info "installing chocolatey"
 	InstallChocolatey
+	choco feature enable -n allowGlobalConfirmation
 }
 InstallScoopPackages
 InstallChocolateyPackages
