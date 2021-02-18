@@ -37,6 +37,7 @@ $scoop_software = @(
     "ripgrep",
     "glow",
     "nu",
+    "starship",
     "tokei"
 )
 $devops_tools = @(
@@ -156,8 +157,8 @@ if ((Get-Command "code" -ErrorAction SilentlyContinue) -ne $null)
 }
 if ((Get-Command "terraform" -ErrorAction SilentlyContinue) -ne $null) 
 { 
-	write-host "Terraform detected. Adding aliases"
-	new-item $profile.CurrentUserAllHosts -ItemType file –Force
+	info "Terraform detected. Adding aliases"
+	new-item $profile.CurrentUserAllHosts -ItemType file -ErrorAction SilentlyContinue
 	'function tf([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
 	'function tfi([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform init $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
 	'function tfa([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform apply -auto-approve $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
@@ -167,4 +168,12 @@ if ((Get-Command "terraform" -ErrorAction SilentlyContinue) -ne $null)
 	'function tfwl([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform workspace list $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
 	'function tfws([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform workspace select $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
 	'function tfo([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform output $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	. $PROFILE.CurrentUserAllHosts
+}
+if ((Get-Command "starship" -ErrorAction SilentlyContinue) -ne $null) 
+{ 
+	write-host "starship detected. updating profile"
+	new-item $profile.CurrentUserAllHosts -ItemType file -ErrorAction SilentlyContinue
+	'Invoke-Expression (&starship init powershell)' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	 . $PROFILE.CurrentUserAllHosts
 }
