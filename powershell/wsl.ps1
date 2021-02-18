@@ -70,6 +70,46 @@ function dl($url,$to) {
     $wc = New-Object Net.Webclient
     $wc.downloadFile($url,$to)
 }
+function Safe-Set-ItemProperty($Path,$Name,$Type,$Value) {
+    try {
+        debug "setting path $Path with name $Name , type $Type and value $Value"
+        Set-ItemProperty -Path "$path" -Name "$Name" -Type $Type -Value $Value -ErrorAction Stop | Out-Null
+    }
+    catch {
+        warn "could not set path $Path with name $Name , type $Type and value $Value"
+    }
+}
+function Safe-Remove-ItemProperty($Path,$Name,$Type,$Value) {
+    try {
+        debug "removing item property $Name of $Path"
+        Remove-ItemProperty -Path "$path" -Name "$Name" -ErrorAction Stop | Out-Null
+    }
+    catch {
+        warn "could not removing item property $Name of $Path"
+    }
+}
+function Safe-Uninstall($app) {
+    try {
+        info "uninstalling $app"
+        Get-AppxPackage -all "$app" | Remove-AppxPackage -AllUsers
+        success "uninstalling $app"
+    }
+    catch {
+        warn "uninstalling $app failed. possible cause is that $app was not installed at the time of executing $script_name script."
+    }
+}
+function Create-Path-If-Not-Exists($Path) {
+    try {
+        debug "checking if path $Path exists"
+        If (!(Test-Path "$Path")) {
+            debug "$Path does not exists. creating ..."
+            New-Item -Path "$Path" -Force -ErrorAction Stop | Out-Null
+        }
+    }
+    catch {
+        warn "could not create path $Path"
+    }
+}
 Function InstallLinuxSubsystem {
     info "Installing Linux Subsystem..."
     Safe-Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" "AllowDevelopmentWithoutDevLicense" DWord 1
