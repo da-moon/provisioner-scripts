@@ -38,6 +38,7 @@ $scoop_software = @(
     "glow",
     "nu",
     "starship",
+    "vcredist2019",
     "tokei"
 )
 $devops_tools = @(
