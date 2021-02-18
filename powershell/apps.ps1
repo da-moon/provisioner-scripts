@@ -32,12 +32,17 @@ $scoop_software = @(
     "slack",
     "firefox",
     "windows-terminal",
-    
+    "brave"
+)
+$devops_tools = @(
+ "terraform",
+ "vault",
+ "consul",
+ "gcloud",
+ "minikube",
+ "kubectl"
 )
 $chocolatey_software = @(
- "terraform",
- "brave",
- "google-cloud-sdk",
 )
 function abort($msg, [int] $exit_code=1) { 
     write-host $msg -f red
@@ -87,6 +92,14 @@ function InstallScoopPackages{
     }
     success "Installing Requested Software With Scoop ..."
 }
+
+function InstallDevopsPackages{
+    info "Installing Requested Software With Scoop ..."
+    foreach($app in $devops_tools) {
+        scoop install -s $app
+    }
+    success "Installing Requested Software With Scoop ..."
+}
 Function InstallChocolatey {
     info "Installing Up Chocolatey ..."
     iwr -useb https://chocolatey.org/install.ps1 | iex
@@ -125,9 +138,28 @@ if ((Get-Command "choco" -ErrorAction SilentlyContinue) -eq $null)
 choco feature enable -n allowGlobalConfirmation
 InstallScoopPackages
 InstallChocolateyPackages
+InstallDevopsPackages
 if ((Get-Command "code" -ErrorAction SilentlyContinue) -ne $null) 
 { 
 	info "VS Code detected. Adding it as a context menu option"
 	reg import "$HOME\scoop\apps\vscode\current\vscode-install-context.reg"
+	if ((Get-Command "git" -ErrorAction SilentlyContinue) -ne $null) 
+	{ 
+	info "setting VS code as default git editor"
+	git config --global core.editor "code --wait"
+	}
 }
-
+if ((Get-Command "terraform" -ErrorAction SilentlyContinue) -ne $null) 
+{ 
+	write-host "Terraform detected. Adding aliases"
+	new-item $profile.CurrentUserAllHosts -ItemType file –Force
+	'function tf([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfi([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform init $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfa([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform apply -auto-approve $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfd([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform destroy -auto-approve $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfp([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform plan $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfw([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform workspace $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfwl([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform workspace list $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfws([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform workspace select $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+	'function tfo([Parameter(ValueFromRemainingArguments = $true)]$params) { & terraform output $params }' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
+}
