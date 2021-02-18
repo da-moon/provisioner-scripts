@@ -32,7 +32,12 @@ $scoop_software = @(
     "slack",
     "firefox",
     "windows-terminal",
-    "brave"
+    "brave",
+    "bat",
+    "ripgrep",
+    "glow",
+    "nu",
+    "tokei"
 )
 $devops_tools = @(
  "terraform",
