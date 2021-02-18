@@ -177,3 +177,5 @@ if ((Get-Command "starship" -ErrorAction SilentlyContinue) -ne $null)
 	'Invoke-Expression (&starship init powershell)' | Out-File $PROFILE.CurrentUserAllHosts -Encoding ascii -Append
 	 . $PROFILE.CurrentUserAllHosts
 }
+#'C:/Users/vagrant/AppData/Local/Microsoft/Windows Terminal/settings.json'
+#"colorScheme": "Solarized Dark",
