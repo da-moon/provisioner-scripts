@@ -22,19 +22,22 @@ $scoop_software = @(
     "yarn",
     "nodejs",
     "vcxsrv",
-    "vscode-insiders",
+    "vscode",
     "shasum",
     "coreutils",
     "dd",
     "win32-openssh",
     "nano",
-    "vim"
+    "vim",
+    "slack",
+    "firefox",
+    "windows-terminal",
+    
 )
 $chocolatey_software = @(
- "terraform"
- "brave"
- "google-cloud-sdk" 
- "alacritty"
+ "terraform",
+ "brave",
+ "google-cloud-sdk",
 )
 function abort($msg, [int] $exit_code=1) { 
     write-host $msg -f red
