@@ -115,9 +115,9 @@ Function InstallLinuxSubsystem {
     Safe-Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" "AllowDevelopmentWithoutDevLicense" DWord 1
     Safe-Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" "AllowAllTrustedApps" DWord 1
     Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -NoRestart -WarningAction SilentlyContinue | Out-Null
-    $url="https://aka.ms/wsl-ubuntu-1804"
     info "enbling Virtual Machine Platform component ..."
     Enable-WindowsOptionalFeature -Online -FeatureName "VirtualMachinePlatform" -NoRestart -WarningAction SilentlyContinue | Out-Null
+    $url="https://aka.ms/wsl-ubuntu-1804"
     $dir=pwd
     $file="ubuntu.appx"
     aria2_dl "$url" "$dir" "$file"
