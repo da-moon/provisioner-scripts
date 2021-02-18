@@ -125,3 +125,9 @@ if ((Get-Command "choco" -ErrorAction SilentlyContinue) -eq $null)
 choco feature enable -n allowGlobalConfirmation
 InstallScoopPackages
 InstallChocolateyPackages
+if ((Get-Command "code" -ErrorAction SilentlyContinue) -ne $null) 
+{ 
+	info "VS Code detected. Adding it as a context menu option"
+	reg import "$HOME\scoop\apps\vscode\current\vscode-install-context.reg"
+}
+
