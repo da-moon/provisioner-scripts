@@ -12,6 +12,7 @@ scripts=(
 "ansible"
 "hashicorp"
 "tfenv"
+"spacevim"
 )
 base="https://raw.githubusercontent.com/da-moon/provisioner-scripts/master/bash/installer"
 for i in "${scripts[@]}";do
