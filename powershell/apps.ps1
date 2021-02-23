@@ -82,7 +82,7 @@ Function RequireAdmin {
 Function InstallScoop {
     info "Installing and conifiguring Scoop  ..."
     info "Installing Up Scoop ..."
-    iwr -useb get.scoop.sh | iex
+    iwr -useb get.scoop.sh | iex -ErrorAction SilentlyContinue
     success "Installing Up Scoop ..."
     info "Installing git ..."
     scoop install git
@@ -95,7 +95,7 @@ Function InstallScoop {
 function InstallScoopPackages{
     info "Installing Requested Software With Scoop ..."
     foreach($app in $scoop_software) {
-        scoop install -s $app
+        scoop install -s $app 
     }
     success "Installing Requested Software With Scoop ..."
 }
@@ -109,7 +109,7 @@ function InstallDevopsPackages{
 }
 Function InstallChocolatey {
     info "Installing Up Chocolatey ..."
-    iwr -useb https://chocolatey.org/install.ps1 | iex
+    iwr -useb https://chocolatey.org/install.ps1 | iex -ErrorAction SilentlyContinue
     success "Installing Up Chocolatey ..."
 }
 function InstallChocolateyPackages{
