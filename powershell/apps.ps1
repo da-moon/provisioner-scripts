@@ -60,6 +60,8 @@ $gui_software = @(
 $scoop_software = $core_cli_tools + $development_tools + $network_tools + $devops_tools + $rust_cli_tools + $gui_software
 # [ NOTE ] install docker in wsl
 # sudo apt-get install docker-ce=18.06.1~ce~3-0~ubuntu
+# [ NOTE ] docker-toolbox guide
+# https://medium.com/@peorth/using-docker-with-virtualbox-and-windows-10-b351e7a34adc
 $chocolatey_software = @(
 # "docker-desktop"
 )
