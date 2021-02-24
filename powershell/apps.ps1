@@ -1,45 +1,35 @@
 #Requires -Version 5
-$package_managers = @(
-    "InstallScoop",
-    "InstallChocolatey"
-)
-$scoop_software = @(
+
+$core_cli_tools = @(
     "7zip",
     "Lessmsi",
     "Innounp", 
     "Dark",
-    "wget",
-    "curl",
     "unzip",
     "zip",
     "unrar",
-    "aria2",
-    "axel",
     "cygwin",
-    "jq",
-    "memreduct",
-    "bulk-crap-uninstaller",
-    "yarn",
-    "nodejs",
-    "vcxsrv",
-    "vscode",
-    "shasum",
     "coreutils",
     "dd",
     "win32-openssh",
-    "nano",
+    "shasum"
+)
+
+$development_tools = @(
     "vim",
-    "slack",
-    "firefox",
-    "windows-terminal",
-    "brave",
-    "bat",
-    "ripgrep",
-    "glow",
-    "nu",
-    "starship",
-    "vcredist2019",
-    "tokei"
+    "nano",
+    "vscode",
+    "nodejs",
+    "yarn"
+)
+
+$network_tools = @(
+    "wget",
+    "curl",
+    "zip",
+    "aria2",
+    "axel",
+    "jq"
 )
 $devops_tools = @(
  "terraform",
@@ -49,7 +39,27 @@ $devops_tools = @(
  "minikube",
  "kubectl"
 )
+$rust_cli_tools = @(
+	"bat",
+	"ripgrep",
+	"glow",
+	"windows-terminal",
+	"nu",
+	"starship",
+	"vcredist2019",
+	"tokei"
+)
+$gui_software = @(
+    "memreduct",
+    "bulk-crap-uninstaller",
+    "vcxsrv",
+    "slack",
+    "firefox"
+)
+
+$scoop_software = $core_cli_tools + $development_tools + $network_tools + $devops_tools + $rust_cli_tools + $gui_software
 $chocolatey_software = @(
+docker-desktop
 )
 function abort($msg, [int] $exit_code=1) { 
     write-host $msg -f red
@@ -79,47 +89,6 @@ Function RequireAdmin {
 		Exit
 	}
 }
-Function InstallScoop {
-    info "Installing and conifiguring Scoop  ..."
-    info "Installing Up Scoop ..."
-    iwr -useb get.scoop.sh | iex -ErrorAction SilentlyContinue
-    success "Installing Up Scoop ..."
-    info "Installing git ..."
-    scoop install git
-    success "Installing git ..."
-    info "adding scoop extras bucket ..."
-    scoop bucket add extras
-    success "adding scoop extras bucket ..."
-    success "Installing and conifiguring Scoop  ..."
-}
-function InstallScoopPackages{
-    info "Installing Requested Software With Scoop ..."
-    foreach($app in $scoop_software) {
-        scoop install -s $app 
-    }
-    success "Installing Requested Software With Scoop ..."
-}
-
-function InstallDevopsPackages{
-    info "Installing Requested Software With Scoop ..."
-    foreach($app in $devops_tools) {
-        scoop install -s $app
-    }
-    success "Installing Requested Software With Scoop ..."
-}
-Function InstallChocolatey {
-    info "Installing Up Chocolatey ..."
-    iwr -useb https://chocolatey.org/install.ps1 | iex -ErrorAction SilentlyContinue
-    success "Installing Up Chocolatey ..."
-}
-function InstallChocolateyPackages{
-    info "Installing Requested Software With Chocolatey ..."
-    foreach($app in $chocolatey_software) {
-        choco install -y $app
-    }
-    success "Installing Requested Software With Chocolatey ..."
-}
-
 # show notification to change execution policy:
 $allowedExecutionPolicy = @('Unrestricted', 'RemoteSigned', 'ByPass')
 if ((Get-ExecutionPolicy).ToString() -notin $allowedExecutionPolicy) {
@@ -132,20 +101,41 @@ RequireAdmin
 # parsing flags
 if ((Get-Command "scoop" -ErrorAction SilentlyContinue) -eq $null) 
 { 
-	warn "Unable to find scoop in your PATH"
-	info "installing scoop"
-	InstallScoop
+	warn "Unable to find scoop in your PATH.installing scoop"
+    	iwr -useb get.scoop.sh | iex -ErrorAction SilentlyContinue
+    	success "Scoop was Installed successfully"
 }
+if ((Get-Command "scoop" -ErrorAction SilentlyContinue) -ne $null) 
+{ 
+	info "Scoop detected"
+    	info "ensuring git is installed"
+    	scoop install git
+	info "ensuring scoop 'extras' bucket is added"
+    	scoop bucket add extras
+	foreach($app in $scoop_software) {
+		info "Installing '$app' Software With scoop"
+		scoop install -s -g $app 
+		success "scoop was able to install '$app' successfully"
+	}
+}
+# [ NOTE ] https://stackoverflow.com/questions/46758437/how-to-refresh-the-environment-of-a-powershell-session-after-a-chocolatey-instal
 if ((Get-Command "choco" -ErrorAction SilentlyContinue) -eq $null) 
 { 
-	warn "Unable to find choco in your PATH"
-	info "installing chocolatey"
-	InstallChocolatey
+	warn "Unable to find choco in your PATH.Installing Chocolatey ..."
+	iwr -useb https://chocolatey.org/install.ps1 | iex -ErrorAction SilentlyContinue
+	success "Chocolatey was installed successfully"
 }
-choco feature enable -n allowGlobalConfirmation
-InstallScoopPackages
-InstallChocolateyPackages
-InstallDevopsPackages
+if ((Get-Command "choco" -ErrorAction SilentlyContinue) -ne $null) 
+{ 
+	info "Chocolatey detected"
+	info "making sure chocolatey does not ask for approval before installing a package"
+	choco feature enable -n allowGlobalConfirmation
+	foreach($app in $chocolatey_software) {
+		info "Installing '$app' Software With Chocolatey"
+        	choco install -y $app
+		success "chocolatey was able to install '$app' successfully"
+    	}
+}
 if ((Get-Command "code" -ErrorAction SilentlyContinue) -ne $null) 
 { 
 	info "VS Code detected. Adding it as a context menu option"
