@@ -1,0 +1,11 @@
+sudo curl -o /usr/local/lib/google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz && \
+sudo tar -C /usr/local/lib -zxf /usr/local/lib/google-cloud-sdk.tar.gz && \
+sudo chown "$USER:$USER" /usr/local/lib/google-cloud-sdk -R && \
+/usr/local/lib/google-cloud-sdk/install.sh \
+  --usage-reporting false \
+  --bash-completion true \
+  --rc-path ~/.bashrc \
+  --path-update true && \
+sudo rm -r /usr/local/lib/google-cloud-sdk.tar.gz && \
+source ~/.bashrc && \
+gcloud components update
