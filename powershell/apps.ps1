@@ -59,7 +59,7 @@ $gui_software = @(
 
 $scoop_software = $core_cli_tools + $development_tools + $network_tools + $devops_tools + $rust_cli_tools + $gui_software
 $chocolatey_software = @(
-docker-desktop
+# "docker-desktop"
 )
 function abort($msg, [int] $exit_code=1) { 
     write-host $msg -f red
