@@ -35,6 +35,7 @@ if [ ! -n "$(command -v gcloud )" ]; then
   sudo rm -r /usr/local/lib/google-cloud-sdk.tar.gz
   sudo chown "$(id -u):$(id -g)" /usr/local/lib/google-cloud-sdk -R
   source "${HOME}/.bashrc"
+  [ -f '/usr/local/lib/google-cloud-sdk/path.bash.inc' ] && . '/usr/local/lib/google-cloud-sdk/path.bash.inc'
 fi
 if [  -n "$(command -v gcloud )" ]; then
   echo "*** 'gcloud' is in path. updating components" 1>&2
