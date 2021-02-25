@@ -8,71 +8,71 @@ export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 VERSION="0.14.5"
 
 function help() {
-    echo
-    echo "Usage: [$(basename "$0")] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
-    echo
-    echo
-    echo -e "[Synopsis]:\tsets up tfenv and installs terraform with it"
-    echo "Optional Flags:"
-    echo
-    echo -e "  --version\t\tterraform version to install. DEFAULT '${VERSION}'"
-    echo
-    echo "Example:"
-    echo
-    echo "  $(basename "$0") --skip otto --skip serf --skip otto --skip terraform"
-    echo
+  echo
+  echo "Usage: [$(basename "$0")] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
+  echo
+  echo
+  echo -e "[Synopsis]:\tsets up tfenv and installs terraform with it"
+  echo "Optional Flags:"
+  echo
+  echo -e "  --version\t\tterraform version to install. DEFAULT '${VERSION}'"
+  echo
+  echo "Example:"
+  echo
+  echo "  $(basename "$0") --skip otto --skip serf --skip otto --skip terraform"
+  echo
 }
 function main() {
   local skip=()
-    while [[ $# -gt 0 ]]; do
-    local key="$1"
-    case "$key" in
-    --version)
-      shift
-      VERSION="${1}"
-      ;;
-    *)
-      help
-      exit
-      ;;
-    esac
+  while [[ $# -gt 0 ]]; do
+  local key="$1"
+  case "$key" in
+  --version)
     shift
+    VERSION="${1}"
+    ;;
+  *)
+    help
+    exit
+    ;;
+  esac
+  shift
   done
-    if [ ! $(command -v sudo) ]; then
-    echo 'Please install "sudo" package' 1>&2
-    exit 1
+  if [ ! $(command -v sudo) ]; then
+  echo 'Please install "sudo" package' 1>&2
+  exit 1
   fi
   if [[ $EUID -eq 0 ]]; then
-    echo "You must run this script as non-root user with sudo permission." 1>&2
-    exit 1
+  echo "You must run this script as non-root user with sudo permission." 1>&2
+  exit 1
   fi
   if [ -n "$(command -v paru)" ]; then
-    echo "*** Detected Arch based Linux" 1>&2
-    paru \
-    --needed \
-    --removemake \
-    --cleanafter \
-    --noconfirm \
-    -Sy tfenv
+  echo "*** Detected Arch based Linux" 1>&2
+  paru \
+  --needed \
+  --removemake \
+  --cleanafter \
+  --noconfirm \
+  -Sy tfenv
   else
-    if [ -n "$(command -v apt-get)" ]; then
-      echo "*** Detected Debian based Linux" 1>&2
-      export DEBIAN_FRONTEND=noninteractive
-      sudo apt-get update -qq > /dev/null 2>&1
-      sudo apt-get install -yqq git > /dev/null 2>&1
+  if [ -n "$(command -v apt-get)" ]; then
+    echo "*** Detected Debian based Linux" 1>&2
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update -qq > /dev/null 2>&1
+    sudo apt-get install -yqq git > /dev/null 2>&1
+  fi
+  if [ -n "$(command -v tfenv)" ]; then
+    echo "*** tfenv is already installed" 1>&2
+  else
+    [ -r ~/.tfenv ] || git clone https://github.com/tfutils/tfenv.git ~/.tfenv > /dev/null 2>&1
+    if ! grep -q "tfenv" ~/.profile; then
+    echo '' | tee -a ~/.profile > /dev/null
+    echo 'git -C ~/.tfenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
+    echo 'export tfenv_ROOT="$HOME/.tfenv"' | tee -a ~/.profile > /dev/null
+    echo 'export PATH="$PATH:$tfenv_ROOT/bin"' | tee -a ~/.profile > /dev/null
+    source ~/.profile
     fi
-    if [ -n "$(command -v tfenv)" ]; then
-      echo "*** tfenv is already installed" 1>&2
-    else
-      [ -r ~/.tfenv ] || git clone https://github.com/tfutils/tfenv.git ~/.tfenv > /dev/null 2>&1
-      if ! grep -q "tfenv" ~/.profile; then
-        echo '' | tee -a ~/.profile > /dev/null
-        echo 'git -C ~/.tfenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
-        echo 'export tfenv_ROOT="$HOME/.tfenv"' | tee -a ~/.profile > /dev/null
-        echo 'export PATH="$PATH:$tfenv_ROOT/bin"' | tee -a ~/.profile > /dev/null
-        source ~/.profile
-      fi
-    fi
+  fi
   fi
   tfenv install ${VERSION} > /dev/null 2>&1 || true
   tfenv use ${VERSION} > /dev/null 2>&1 || true
@@ -93,8 +93,8 @@ if [ -z "${BASH_SOURCE+x}" ]; then
   exit $?
 else
   if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "${@}"
-    exit $?
+  main "${@}"
+  exit $?
   fi
 fi
 

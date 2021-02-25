@@ -23,22 +23,22 @@ if [ -n "$(command -v paru)" ]; then
   -Sy goenv
 else
   if [ -n "$(command -v apt-get)" ]; then
-    echo "*** Detected Debian based Linux" 1>&2
-    export DEBIAN_FRONTEND=noninteractive
-    sudo apt-get update -qq > /dev/null 2>&1
-    sudo apt-get install -yqq git > /dev/null 2>&1
+  echo "*** Detected Debian based Linux" 1>&2
+  export DEBIAN_FRONTEND=noninteractive
+  sudo apt-get update -qq > /dev/null 2>&1
+  sudo apt-get install -yqq git > /dev/null 2>&1
   fi
   if [ -n "$(command -v goenv)" ]; then
-    echo "*** goenv is already installed" 1>&2
+  echo "*** goenv is already installed" 1>&2
   else
-    [ -r ~/.goenv ] || git clone https://github.com/syndbg/goenv.git ~/.goenv > /dev/null 2>&1
-    if ! grep -q "goenv" ~/.profile; then
-      echo 'git -C ~/.goenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
-      echo 'export GOENV_ROOT="$HOME/.goenv"' | tee -a ~/.profile > /dev/null
-      echo 'export PATH="$PATH:$GOENV_ROOT/bin"' | tee -a ~/.profile > /dev/null
-      echo 'eval "$(goenv init -)"' | tee -a ~/.profile > /dev/null
-      source ~/.profile
-    fi
+  [ -r ~/.goenv ] || git clone https://github.com/syndbg/goenv.git ~/.goenv > /dev/null 2>&1
+  if ! grep -q "goenv" ~/.profile; then
+    echo 'git -C ~/.goenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
+    echo 'export GOENV_ROOT="$HOME/.goenv"' | tee -a ~/.profile > /dev/null
+    echo 'export PATH="$PATH:$GOENV_ROOT/bin"' | tee -a ~/.profile > /dev/null
+    echo 'eval "$(goenv init -)"' | tee -a ~/.profile > /dev/null
+    source ~/.profile
+  fi
   fi
 fi
 if [ -n "$(command -v go)" ]; then

@@ -19,32 +19,32 @@ if [ -n "$(command -v paru)" ]; then
   exit 0
 else
   if [ -n "$(command -v apt-get)" ]; then
-    echo "*** Detected Debian based Linux" 1>&2
-    export DEBIAN_FRONTEND=noninteractive
-    sudo apt-get update -qq > /dev/null 2>&1
-    sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
+  echo "*** Detected Debian based Linux" 1>&2
+  export DEBIAN_FRONTEND=noninteractive
+  sudo apt-get update -qq > /dev/null 2>&1
+  sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
   fi
 fi
 if [ ! -n "$(command -v nu )" ]; then
   if [ ! $(which curl) ]; then
-    echo 'Please install "curl" package' 1>&2
-    exit 1
+  echo 'Please install "curl" package' 1>&2
+  exit 1
   fi
   if [ ! $(which wget) ]; then
-      echo 'Please install "wget" package' 1>&2
-      exit 1
+    echo 'Please install "wget" package' 1>&2
+    exit 1
   fi
   if [ ! $(which jq) ]; then
-    echo 'Please install "jq" package' 1>&2
-    exit 1
+  echo 'Please install "jq" package' 1>&2
+  exit 1
   fi
   rm -rf /tmp/nushell
   mkdir -p /tmp/nushell
   curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
   tar \
-      -xzf /tmp/nushell/nushell.tar.gz \
-      -C /tmp/nushell \
-      --strip-components=2
+    -xzf /tmp/nushell/nushell.tar.gz \
+    -C /tmp/nushell \
+    --strip-components=2
   rm -rf /tmp/nushell/nushell.tar.gz
   sudo mv /tmp/nushell/nu* /usr/local/bin/
   rm -rf /tmp/nushell

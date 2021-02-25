@@ -43,87 +43,87 @@ Vagrant.configure("2") do |config|
   config.vagrant.plugins = [ "vagrant-vbguest" ]
   config.vm.box = "generic/debian10"
   config.vm.provider "virtualbox" do |vb, override|
-    vb.memory = "#{memory}"
-    vb.cpus   = "#{cpus}"
-    # => enable nested virtualization
-    vb.customize ["modifyvm",:id,"--nested-hw-virt", "on"]    
-    override.vm.synced_folder ".", "#{synced_folder}",disabled: false,
-      auto_correct:true, owner: "vagrant",group: "vagrant",type: "virtualbox"
+  vb.memory = "#{memory}"
+  vb.cpus   = "#{cpus}"
+  # => enable nested virtualization
+  vb.customize ["modifyvm",:id,"--nested-hw-virt", "on"]    
+  override.vm.synced_folder ".", "#{synced_folder}",disabled: false,
+    auto_correct:true, owner: "vagrant",group: "vagrant",type: "virtualbox"
   end
   # [ WARN ] => avoid hyper-v if you can. It is the worst hypervisor that I have worked with.
   # it has horerendous memory/cpu management. it makes my on my surface book 3 ( 32 GB RAM ) model , which is 
   # the flagship Microsoft laptop, slow as hell.
   # [ REF ] => https://docs.microsoft.com/en-us/virtualization/community/team-blog/2017/20170706-vagrant-and-hyper-v-tips-and-tricks
   config.vm.provider "hyperv" do |h,override|
-    h.enable_virtualization_extensions = true
-    h.linked_clone = true
-    h.cpus   = "#{cpus}"
-    # [ NOTE ] => https://github.com/hashicorp/vagrant/issues/10349#issuecomment-435185440
-    h.memory = "#{memory}"
-    h.maxmemory = "#{memory}"
-    override.vm.network "public_network"
-    override.vm.synced_folder ".", "#{synced_folder}",disabled: false,auto_correct:true, type: "smb",
-    owner: "vagrant",group: "vagrant"
+  h.enable_virtualization_extensions = true
+  h.linked_clone = true
+  h.cpus   = "#{cpus}"
+  # [ NOTE ] => https://github.com/hashicorp/vagrant/issues/10349#issuecomment-435185440
+  h.memory = "#{memory}"
+  h.maxmemory = "#{memory}"
+  override.vm.network "public_network"
+  override.vm.synced_folder ".", "#{synced_folder}",disabled: false,auto_correct:true, type: "smb",
+  owner: "vagrant",group: "vagrant"
   end
   # [ NOTE ] => use libvirt for the most optimized experience
   # [ NOTE ] => use vagrant ( vagrant plugin install vagrant-libvirt )
   # to install libvirt provider rather than package manager
   # (sudo apt-get install vagrant-libvirt) to get the latest version.
   config.vm.provider "libvirt" do |libvirt,override|
-    libvirt.memory = "#{memory}"
-    libvirt.cpus = "#{cpus}"
-    libvirt.nested = true
-    libvirt.cpu_mode = "host-passthrough"
-    libvirt.driver = "kvm"
-    # [ NOTE ] => https://askubuntu.com/questions/772784/9p-libvirt-qemu-share-modes
-    # [ NOTE ] => ensuring vagrant user owns the folder
-    override.vm.synced_folder ".", "#{synced_folder}", 
-      disabled: false,auto_correct:true, owner: "1000", group: "1000",
-      type: "9p",  accessmode: "passthrough" 
-    override.vm.provision "shell",
-      privileged:true,
-      name:"p9-kernel-support",
-      inline: <<-SCRIPT
-      [ ! -L /usr/local/bin/modprobe ] && sudo ln -s /sbin/modprobe /usr/local/bin/modprobe
-    SCRIPT
+  libvirt.memory = "#{memory}"
+  libvirt.cpus = "#{cpus}"
+  libvirt.nested = true
+  libvirt.cpu_mode = "host-passthrough"
+  libvirt.driver = "kvm"
+  # [ NOTE ] => https://askubuntu.com/questions/772784/9p-libvirt-qemu-share-modes
+  # [ NOTE ] => ensuring vagrant user owns the folder
+  override.vm.synced_folder ".", "#{synced_folder}", 
+    disabled: false,auto_correct:true, owner: "1000", group: "1000",
+    type: "9p",  accessmode: "passthrough" 
+  override.vm.provision "shell",
+    privileged:true,
+    name:"p9-kernel-support",
+    inline: <<-SCRIPT
+    [ ! -L /usr/local/bin/modprobe ] && sudo ln -s /sbin/modprobe /usr/local/bin/modprobe
+  SCRIPT
 
   end if Vagrant.has_plugin?('vagrant-libvirt')
   forwarded_ports.each do |port|
-    config.vm.network "forwarded_port", 
-      guest: port, 
-      host: port,
-      auto_correct: true
+  config.vm.network "forwarded_port", 
+    guest: port, 
+    host: port,
+    auto_correct: true
   end
   config.vm.provision "shell",
-    privileged:false,
-    name:"cleanup", 
-    path: "#{UTIL_SCRIPTS_BASE}/clean-pkgs"
+  privileged:false,
+  name:"cleanup", 
+  path: "#{UTIL_SCRIPTS_BASE}/clean-pkgs"
   config.vm.provision "shell",
-    privileged:false,
-    name:"init",
-    path: "#{INSTALLER_SCRIPTS_BASE}/init"
+  privileged:false,
+  name:"init",
+  path: "#{INSTALLER_SCRIPTS_BASE}/init"
   # [ NOTE ] => downloading helper executable scripts
   utility_scripts.each do |utility|
-    config.vm.provision "shell",
-      privileged:false,
-      name:"#{utility}-utility-script",
-      inline: <<-SCRIPT
-    [ -r /usr/local/bin/#{utility} ] || \
-      sudo curl -s \
-      -o /usr/local/bin/#{utility} \
-      #{UTIL_SCRIPTS_BASE}/#{utility} && \
-      sudo chmod +x /usr/local/bin/#{utility}
-    SCRIPT
+  config.vm.provision "shell",
+    privileged:false,
+    name:"#{utility}-utility-script",
+    inline: <<-SCRIPT
+  [ -r /usr/local/bin/#{utility} ] || \
+    sudo curl -s \
+    -o /usr/local/bin/#{utility} \
+    #{UTIL_SCRIPTS_BASE}/#{utility} && \
+    sudo chmod +x /usr/local/bin/#{utility}
+  SCRIPT
   end
   # [ NOTE ] => provisioning
   provisioners.each do |provisioner|
-    config.vm.provision "shell",
-      privileged:false,
-      name:"#{provisioner}",
-      path: "#{INSTALLER_SCRIPTS_BASE}/#{provisioner}"
+  config.vm.provision "shell",
+    privileged:false,
+    name:"#{provisioner}",
+    path: "#{INSTALLER_SCRIPTS_BASE}/#{provisioner}"
   end
   config.trigger.after [:provision] do |t|
-    t.info = "cleaning up after provisioning"
-    t.run_remote = {path: "#{UTIL_SCRIPTS_BASE}/clean-pkgs" }
+  t.info = "cleaning up after provisioning"
+  t.run_remote = {path: "#{UTIL_SCRIPTS_BASE}/clean-pkgs" }
   end
 end

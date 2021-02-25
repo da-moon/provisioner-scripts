@@ -26,17 +26,17 @@ if [ -n "$(command -v apt-get)" ]; then
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq >/dev/null 2>&1
   sudo apt-get -yqq install curl neovim \
-    python3-neovim vim-gtk >/dev/null 2>&1
+  python3-neovim vim-gtk >/dev/null 2>&1
 fi
 if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
   paru --needed --removemake \
-    --cleanafter --noconfirm \
-    -Sy gvim neovim python-pynvim curl xorg-font-utils
+  --cleanafter --noconfirm \
+  -Sy gvim neovim python-pynvim curl xorg-font-utils
 fi
 if [ ! $(which curl) ]; then
-    echo 'Please install "curl" package' 1>&2
-    exit 1
+  echo 'Please install "curl" package' 1>&2
+  exit 1
 fi
 curl -sLf https://spacevim.org/install.sh | bash > /dev/null 2>&1
 curl -sLf https://spacevim.org/install.sh | sudo -H -s -u root bash -s > /dev/null 2>&1
@@ -45,12 +45,12 @@ sudo yarn global add --silent remark remark-cli remark-stringify remark-frontmat
 mkdir -p ~/.SpaceVim.d/
 cat << EOF | tee ~/.SpaceVim.d/init.toml > /dev/null
 [[custom_plugins]]
-    repo = "chr4/nginx.vim"
-    merged = false
+  repo = "chr4/nginx.vim"
+  merged = false
 
 [[custom_plugins]]
-    repo = "hashivim/vim-hashicorp-tools"
-    merged = false
+  repo = "hashivim/vim-hashicorp-tools"
+  merged = false
 
 [[custom_plugins]]
   repo = "jvirtanen/vim-hcl"
@@ -143,10 +143,10 @@ default_height = 30
   clang_executable = "/usr/bin/clang"
   clang_flag = ['-I/user/include']
   [layer.clang_std]
-    c = "c11"
-    cpp = "c++1z"
-    objc = "c11"
-    objcpp = "c++1z"
+  c = "c11"
+  cpp = "c++1z"
+  objc = "c11"
+  objcpp = "c++1z"
 
 # gem install rubocop
 [[layers]]
@@ -158,10 +158,10 @@ default_height = 30
   # [REF] => https://spacevim.org/layers/lang/python/
   name = "lang#python"
   python_file_head = [
-    '#!/usr/bin/env python',
-    '# -*- coding: utf-8 -*-',
-    '',
-    ''
+  '#!/usr/bin/env python',
+  '# -*- coding: utf-8 -*-',
+  '',
+  ''
   ]
   format_on_save = true
   # [NOTE] => can slow things down
@@ -204,21 +204,21 @@ default_height = 30
   enable_statusline_mode = true
   # left sections of statusline
   statusline_left_sections = [
-    'winnr',
-    'major mode',
-    'filename',
-    'fileformat',
-    'minor mode lighters',
-    'version control info',
-    'search status'
+  'winnr',
+  'major mode',
+  'filename',
+  'fileformat',
+  'minor mode lighters',
+  'version control info',
+  'search status'
   ]
   # right sections of statusline
   statusline_right_sections = [
-    'cursorpos',
-    'percentage',
-    'input method',
-    'date',
-    'time'
+  'cursorpos',
+  'percentage',
+  'input method',
+  'date',
+  'time'
   ]
   # [END] => Statusline
 EOF

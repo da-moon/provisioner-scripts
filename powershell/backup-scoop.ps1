@@ -3,8 +3,8 @@
 scoop cache
 
 if ((Read-Host "Are you sure remove scoop cache? y/N") -eq "y") {
-"remove scoop cache"
-scoop cache rm *
+  "remove scoop cache"
+  scoop cache rm *
 }
 
 "check apps install by scoop"
@@ -22,28 +22,28 @@ if ((Read-Host "Are you sure all scoop apps had closed? y/N") -eq "y") {
   
   if (Test-Path $env:USERPROFILE\scoop\apps\7zip\current\) {
   
-    "Copy scoop's 7z.exe & 7z.dll to current path"
-    Copy-Item -Path "$env:USERPROFILE\scoop\apps\7zip\current\7z.dll" -Destination $Destination -Force
-    Copy-Item -Path "$env:USERPROFILE\scoop\apps\7zip\current\7z.exe" -Destination $Destination -Force
-    
-    
-    #Show-Tree -Path $env:USERPROFILE\scoop\apps\ -Depth 2 -ShowProperty mode
-    
-    "Remove the `"current`" folder in scoop apps"
-    Get-Item $env:USERPROFILE\scoop\apps\*\current | ForEach-Object {
-      if ($_.mode -eq "d-r--l") {
-      Remove-Item $_.FullName -Recurse -Force -Confirm:$false
-      }
+  "Copy scoop's 7z.exe & 7z.dll to current path"
+  Copy-Item -Path "$env:USERPROFILE\scoop\apps\7zip\current\7z.dll" -Destination $Destination -Force
+  Copy-Item -Path "$env:USERPROFILE\scoop\apps\7zip\current\7z.exe" -Destination $Destination -Force
+  
+  
+  #Show-Tree -Path $env:USERPROFILE\scoop\apps\ -Depth 2 -ShowProperty mode
+  
+  "Remove the `"current`" folder in scoop apps"
+  Get-Item $env:USERPROFILE\scoop\apps\*\current | ForEach-Object {
+    if ($_.mode -eq "d-r--l") {
+    Remove-Item $_.FullName -Recurse -Force -Confirm:$false
     }
-    
-    "backup scoop - add scoop folder to archive"
-    . (Join-Path $Destination "7z.exe") a $Destination\Scoop.7z $env:USERPROFILE\scoop\
-    
-    "add the current folder back"
-    scoop reset *
+  }
+  
+  "backup scoop - add scoop folder to archive"
+  . (Join-Path $Destination "7z.exe") a $Destination\Scoop.7z $env:USERPROFILE\scoop\
+  
+  "add the current folder back"
+  scoop reset *
 
-    "Backup done, please enter to close the window"
-    Pause
+  "Backup done, please enter to close the window"
+  Pause
   } else {
   "You should run `"scoop install 7z`" first"
   }

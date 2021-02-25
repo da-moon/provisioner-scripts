@@ -16,8 +16,8 @@ fi
 if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
   paru --needed --removemake \
-    --cleanafter --noconfirm \
-    -Sy ripgrep ripgrep-all
+  --cleanafter --noconfirm \
+  -Sy ripgrep ripgrep-all
   # rga deps
   paru --noconfirm -Sy --needed graphicsmagick poppler tesseract
   # poppler deps
@@ -27,33 +27,33 @@ if [ -n "$(command -v paru)" ]; then
   exit 0
 else 
   if [ -n "$(command -v apt-get)" ]; then
-    echo "*** Detected Debian based Linux" 1>&2
-    export DEBIAN_FRONTEND=noninteractive
-    sudo apt-get update -qq > /dev/null 2>&1
-    sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
+  echo "*** Detected Debian based Linux" 1>&2
+  export DEBIAN_FRONTEND=noninteractive
+  sudo apt-get update -qq > /dev/null 2>&1
+  sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
   fi
 fi
 
 if [ ! -n "$(command -v rg )" ]; then
   if [ ! $(which curl) ]; then
-      echo 'Please install "curl" package' 1>&2
-      exit 1
+    echo 'Please install "curl" package' 1>&2
+    exit 1
   fi
   if [ ! $(which wget) ]; then
-      echo 'Please install "wget" package' 1>&2
-      exit 1
+    echo 'Please install "wget" package' 1>&2
+    exit 1
   fi
   if [ ! $(which jq) ]; then
-    echo 'Please install "jq" package' 1>&2
-    exit 1
+  echo 'Please install "jq" package' 1>&2
+  exit 1
   fi
   rm -rf /tmp/ripgrep*
   mkdir -p /tmp/ripgrep
   curl -sL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("x86_64") and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget --quiet --no-cache -O /tmp/ripgrep.tar.gz {}
   sudo tar \
-      -xzf /tmp/ripgrep.tar.gz \
-      -C /tmp/ripgrep \
-      --strip-components=1
+    -xzf /tmp/ripgrep.tar.gz \
+    -C /tmp/ripgrep \
+    --strip-components=1
   sudo mv /tmp/ripgrep/rg /usr/local/bin/rg
   sudo mv /tmp/ripgrep/complete/rg.bash  /etc/bash_completion.d/rg.bash
   sudo chmod +x /usr/local/bin/rg

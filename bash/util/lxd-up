@@ -71,14 +71,14 @@ function log() {
   local color
   case "$level" in
   INFO)
-    color="string_green"
-    ;;
+  color="string_green"
+  ;;
   WARN)
-    color="string_yellow"
-    ;;
+  color="string_yellow"
+  ;;
   ERROR)
-    color="string_red"
-    ;;
+  color="string_red"
+  ;;
   esac
   echo >&2 -e "$(${color} "${timestamp} [${level}] ==>") $(string_blue "[$script_name]") ${message}"
 }
@@ -100,76 +100,76 @@ function assert_not_empty() {
   local -r arg_value="$2"
   local -r reason="$3"
   if [[ -z "$arg_value" ]]; then
-    log_error "'$arg_name' cannot be empty. $reason"
-    exit 1
+  log_error "'$arg_name' cannot be empty. $reason"
+  exit 1
   fi
   log_info "'$arg_name' -> $arg_value"
 }
 function create_lxd_profile(){
 	local -r username="$1"
   if ! lxc storage show privileged_box > /dev/null 2>&1 ;then
-    log_info "creating privileged_box storage pool"
-    lxc storage create privileged_box dir > /dev/null 2>&1 || true
+  log_info "creating privileged_box storage pool"
+  lxc storage create privileged_box dir > /dev/null 2>&1 || true
   fi
   if ! lxc profile show privileged_box > /dev/null 2>&1 ;then
-    log_info "creating privileged_box profile"
-    lxc profile create privileged_box > /dev/null 2>&1 
-    cat << EOF | lxc profile edit privileged_box
+  log_info "creating privileged_box profile"
+  lxc profile create privileged_box > /dev/null 2>&1 
+  cat << EOF | lxc profile edit privileged_box
 name: privileged_box
 config:
   boot.autostart: "true"
   linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
   raw.lxc: |
-    lxc.apparmor.profile=unconfined
-    lxc.mount.auto=proc:rw sys:rw cgroup:rw
-    lxc.cgroup.devices.allow=a
-    lxc.cap.drop=
+  lxc.apparmor.profile=unconfined
+  lxc.mount.auto=proc:rw sys:rw cgroup:rw
+  lxc.cgroup.devices.allow=a
+  lxc.cap.drop=
   security.nesting: "true"
   security.privileged: "true"
   user.user-data: |
-    #cloud-config
-    users:
-      - name: ${username}
-        sudo: ['ALL=(ALL) NOPASSWD:ALL']
-        groups: sudo
-        shell: /bin/bash
-    packages:
-      - sudo
-      - git
-      - curl
-      - wget
-      - jq
-      - ca-certificates
-      - openssh-server
-      - gnupg2
+  #cloud-config
+  users:
+    - name: ${username}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+  packages:
+    - sudo
+    - git
+    - curl
+    - wget
+    - jq
+    - ca-certificates
+    - openssh-server
+    - gnupg2
 description: "Nested LXD Profile"
 devices:
 devices:
   eth0:
-    name: eth0
-    nictype: bridged
-    parent: lxdbr0
-    type: nic
+  name: eth0
+  nictype: bridged
+  parent: lxdbr0
+  type: nic
   root:
-    path: /
-    pool: privileged_box
-    type: disk
+  path: /
+  pool: privileged_box
+  type: disk
   aadisable:
-    path: /sys/module/nf_conntrack/parameters/hashsize
-    source: /sys/module/nf_conntrack/parameters/hashsize
-    type: disk
+  path: /sys/module/nf_conntrack/parameters/hashsize
+  source: /sys/module/nf_conntrack/parameters/hashsize
+  type: disk
   aadisable1:
-    path: /sys/module/apparmor/parameters/enabled
-    source: /dev/null
-    type: disk
+  path: /sys/module/apparmor/parameters/enabled
+  source: /dev/null
+  type: disk
   aadisable2:
-    path: /dev/kmsg
-    source: /dev/kmsg
-    type: disk
+  path: /dev/kmsg
+  source: /dev/kmsg
+  type: disk
   aadisable3:
-    path: /sys/fs/bpf
-    source: /sys/fs/bpf
-    type: disk
+  path: /sys/fs/bpf
+  source: /sys/fs/bpf
+  type: disk
 EOF
   fi
 }
@@ -254,13 +254,13 @@ function ssh_config(){
   log_info "storing ssh config for '$container_name' in ~/.ssh/config"
 	cat << EOF | tee -a ~/.ssh/config > /dev/null
 Host ${container_name}
-    HostName ${ip}
-    User ${username}
-    IdentityFile ~/.ssh/${container_name}_id_rsa
-    IdentitiesOnly yes
-    StrictHostKeyChecking no
-    CheckHostIP no
-    UserKnownHostsFile /dev/null
+  HostName ${ip}
+  User ${username}
+  IdentityFile ~/.ssh/${container_name}_id_rsa
+  IdentitiesOnly yes
+  StrictHostKeyChecking no
+  CheckHostIP no
+  UserKnownHostsFile /dev/null
 EOF
 }
 function provision_git(){
@@ -447,9 +447,9 @@ if [ -n "$(command -v apt-get)" ]; then
 fi
 if [ -n "$(command -v dnf)" ]; then
   sudo dnf config-manager \
-    --add-repo \
-    https://download.docker.com/linux/fedora/docker-ce.repo
-    sudo dnf install docker-ce docker-ce-cli containerd.io -y
+  --add-repo \
+  https://download.docker.com/linux/fedora/docker-ce.repo
+  sudo dnf install docker-ce docker-ce-cli containerd.io -y
 fi
 EOF
   log_info "'$container_name' container : installing docker-compose"
@@ -501,12 +501,12 @@ curl -sLf https://spacevim.org/install.sh | bash
 mkdir -p ~/.SpaceVim.d
 cat << _EOF_ | tee ~/.SpaceVim.d/init.toml > /dev/null
 [[custom_plugins]]
-    repo = "chr4/nginx.vim"
-    merged = false
+  repo = "chr4/nginx.vim"
+  merged = false
 
 [[custom_plugins]]
-    repo = "hashivim/vim-hashicorp-tools"
-    merged = false
+  repo = "hashivim/vim-hashicorp-tools"
+  merged = false
 
 [[custom_plugins]]
   repo = "jvirtanen/vim-hcl"
@@ -599,10 +599,10 @@ default_height = 30
   clang_executable = "/usr/bin/clang"
   clang_flag = ['-I/user/include']
   [layer.clang_std]
-    c = "c11"
-    cpp = "c++1z"
-    objc = "c11"
-    objcpp = "c++1z"
+  c = "c11"
+  cpp = "c++1z"
+  objc = "c11"
+  objcpp = "c++1z"
 
 # gem install rubocop
 [[layers]]
@@ -614,10 +614,10 @@ default_height = 30
   # [REF] => https://spacevim.org/layers/lang/python/
   name = "lang#python"
   python_file_head = [
-    '#!/usr/bin/env python',
-    '# -*- coding: utf-8 -*-',
-    '',
-    ''
+  '#!/usr/bin/env python',
+  '# -*- coding: utf-8 -*-',
+  '',
+  ''
   ]
   format_on_save = true
   # [NOTE] => can slow things down
@@ -660,21 +660,21 @@ default_height = 30
   enable_statusline_mode = true
   # left sections of statusline
   statusline_left_sections = [
-    'winnr',
-    'major mode',
-    'filename',
-    'fileformat',
-    'minor mode lighters',
-    'version control info',
-    'search status'
+  'winnr',
+  'major mode',
+  'filename',
+  'fileformat',
+  'minor mode lighters',
+  'version control info',
+  'search status'
   ]
   # right sections of statusline
   statusline_right_sections = [
-    'cursorpos',
-    'percentage',
-    'input method',
-    'date',
-    'time'
+  'cursorpos',
+  'percentage',
+  'input method',
+  'date',
+  'time'
   ]
   # [END] => Statusline
 _EOF_
@@ -707,15 +707,15 @@ function provision_nushell(){
   sudo apt-get install libssl-dev -yqq > /dev/null 2>&1
   fi
   if [ -n "$(command -v dnf)" ]; then
-    sudo dnf install openssl-devel -y
+  sudo dnf install openssl-devel -y
   fi
   rm -rf /tmp/nushell
   mkdir -p /tmp/nushell
   curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
   tar \
-      -xzf /tmp/nushell/nushell.tar.gz \
-      -C /tmp/nushell \
-      --strip-components=2
+    -xzf /tmp/nushell/nushell.tar.gz \
+    -C /tmp/nushell \
+    --strip-components=2
   rm -rf /tmp/nushell/nushell.tar.gz
   sudo mv /tmp/nushell/nu* /usr/local/bin/
   rm -rf /tmp/nushell
@@ -779,20 +779,20 @@ function help() {
 }
 function main() {
   if [[ $# == 0 ]]; then
-    help
-    exit
+  help
+  exit
   fi
   if ! command -v "lxc" >/dev/null ; then
-    log_error "'lxc' was not found in PATH"
-    return 1
+  log_error "'lxc' was not found in PATH"
+  return 1
   fi
   if ! command -v "jq" >/dev/null ; then
-    log_error "'jq' was not found in PATH"
-    return 1
+  log_error "'jq' was not found in PATH"
+  return 1
   fi
   if ! command -v "sshpass" >/dev/null ; then
-    log_error "'sshpass' was not found in PATH"
-    return 1
+  log_error "'sshpass' was not found in PATH"
+  return 1
   fi
   local CONTAINER_NAME
   local USERNAME="$USER"
@@ -809,55 +809,55 @@ function main() {
   local NU=false
   local FEDORA=false
   while [[ $# -gt 0 ]]; do
-    local key="$1"
-    case "$key" in
-      --name)
-        CONTAINER_NAME="$2"
-        shift
-      ;;
-      --username)
-        USERNAME="$2"
-        shift
-      ;;
-      --fedora)
-        FEDORA=true
-      ;;
-      --ssh-config)
-        SSH_CONFIG=true
-      ;;
-      --git)
-        GIT=true
-      ;;
-      --nu)
-        NU=true
-      ;;
-      --starship)
-        STARSHIP=true
-      ;;
-      --rg)
-        RG=true
-      ;;
-      --spacevim)
-        SPACEVIM=true
-      ;;
-      --goenv)
-        GOENV=true
-      ;;
-      --rbenv)
-        RBENV=true
-      ;;
-      --python)
-        PYTHON=true
-      ;;
-      --docker)
-        DOCKER=true
-      ;;
-      *)
-        help
-        exit 1
-      ;;
-    esac
+  local key="$1"
+  case "$key" in
+    --name)
+    CONTAINER_NAME="$2"
     shift
+    ;;
+    --username)
+    USERNAME="$2"
+    shift
+    ;;
+    --fedora)
+    FEDORA=true
+    ;;
+    --ssh-config)
+    SSH_CONFIG=true
+    ;;
+    --git)
+    GIT=true
+    ;;
+    --nu)
+    NU=true
+    ;;
+    --starship)
+    STARSHIP=true
+    ;;
+    --rg)
+    RG=true
+    ;;
+    --spacevim)
+    SPACEVIM=true
+    ;;
+    --goenv)
+    GOENV=true
+    ;;
+    --rbenv)
+    RBENV=true
+    ;;
+    --python)
+    PYTHON=true
+    ;;
+    --docker)
+    DOCKER=true
+    ;;
+    *)
+    help
+    exit 1
+    ;;
+  esac
+  shift
   done
   assert_not_empty "CONTAINER_NAME" "$CONTAINER_NAME" "required variable."
   assert_not_empty "USERNAME" "$USERNAME" "required variable."
@@ -874,26 +874,26 @@ function main() {
   assert_not_empty "FEDORA" "$FEDORA" "required variable."
   create_lxd_profile "$USERNAME"
   if [ "$FEDORA" = true ] ; then
-    launch_fedora "$CONTAINER_NAME" "$USERNAME" || true
+  launch_fedora "$CONTAINER_NAME" "$USERNAME" || true
   else
-    launch_debian "$CONTAINER_NAME" "$USERNAME" || true
+  launch_debian "$CONTAINER_NAME" "$USERNAME" || true
   fi
   log_info "waiting for '$CONTAINER_NAME' to be ready"
   lxc exec "$CONTAINER_NAME" -- bash -c 'while [ "$(systemctl is-system-running 2>/dev/null)" != "running" ] && [ "$(systemctl is-system-running 2>/dev/null)" != "degraded" ]; do :; done'
   sleep 20;
   provision_base "$CONTAINER_NAME" "$USERNAME"
   if [ "$SSH_CONFIG" = true ] ; then
-    ssh_config "$CONTAINER_NAME" "$USERNAME"
+  ssh_config "$CONTAINER_NAME" "$USERNAME"
   fi
   if [ "$GIT" = true ] ; then
-    provision_git "$CONTAINER_NAME"
+  provision_git "$CONTAINER_NAME"
   fi
   if [ "$NU" = true ] ; then
-    provision_nushell "$CONTAINER_NAME"
+  provision_nushell "$CONTAINER_NAME"
   fi
   if [ "$STARSHIP" = true ] ; then
-    provision_starship "$CONTAINER_NAME"
-    if [ "$NU" = true ] ; then
+  provision_starship "$CONTAINER_NAME"
+  if [ "$NU" = true ] ; then
    	ssh -q "${container_name}" << 'ENDSSH'
 nu << 'EOF'
 config set prompt "echo $(STARSHIP_SHELL= starship prompt)"
@@ -902,22 +902,22 @@ ENDSSH
    fi 
   fi
   if [ "$RG" = true ] ; then
-    provision_ripgrep "$CONTAINER_NAME"
+  provision_ripgrep "$CONTAINER_NAME"
   fi
   if [ "$PYTHON" = true ] ; then
-    provision_python "$CONTAINER_NAME"
+  provision_python "$CONTAINER_NAME"
   fi
   if [ "$RBENV" = true ] ; then
-    provision_rbenv "$CONTAINER_NAME"
+  provision_rbenv "$CONTAINER_NAME"
   fi
   if [ "$GOENV" = true ] ; then
-    provision_goenv "$CONTAINER_NAME"
+  provision_goenv "$CONTAINER_NAME"
   fi
   if [ "$DOCKER" = true ] ; then
-    provision_docker "$CONTAINER_NAME"
+  provision_docker "$CONTAINER_NAME"
   fi
   if [ "$SPACEVIM" = true ] ; then
-    provision_spacevim "$CONTAINER_NAME" "$USERNAME"
+  provision_spacevim "$CONTAINER_NAME" "$USERNAME"
   fi
   exit $?
 }
@@ -926,8 +926,8 @@ if [ -z "${BASH_SOURCE+x}" ]; then
   exit $?
 else
   if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "${@}"
-    exit $?
+  main "${@}"
+  exit $?
   fi
 fi
 

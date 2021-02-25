@@ -17,18 +17,18 @@ if [ -n "$(command -v go)" ]; then
   echo "*** go toolchain detected. building levant from source." 1>&2
   export GO111MODULE=on
   if [ -n "$(command -v apt-get)" ]; then
-    echo "*** Detected Debian based Linux" 1>&2
-    export DEBIAN_FRONTEND=noninteractive
-    sudo apt update -qq > /dev/null 2>&1
-    sudo apt install -yqq git > /dev/null 2>&1
+  echo "*** Detected Debian based Linux" 1>&2
+  export DEBIAN_FRONTEND=noninteractive
+  sudo apt update -qq > /dev/null 2>&1
+  sudo apt install -yqq git > /dev/null 2>&1
   fi
   if [ -n "$(command -v pacman)" ]; then
-    echo "*** Detected Arch based Linux" 1>&2
-    sudo pacman --noconfirm --needed -Sy git
+  echo "*** Detected Arch based Linux" 1>&2
+  sudo pacman --noconfirm --needed -Sy git
   fi
   if [ ! $(which git) ]; then
-    echo 'Please install "git" package' 1>&2
-    exit 1
+  echo 'Please install "git" package' 1>&2
+  exit 1
   fi
   sudo rm -rf "$(go env GOPATH)/src/github.com/hashicorp/levant"
   sudo rm -rf "$(go env GOPATH)/bin/levant"
@@ -41,27 +41,27 @@ if [ -n "$(command -v go)" ]; then
 else 
   echo "*** go toolchain not found. downloading latest release from git" 1>&2
   if [ -n "$(command -v apt-get)" ]; then
-    sudo apt update -qq > /dev/null 2>&1
-    sudo apt install -yqq curl jq wget > /dev/null 2>&1
+  sudo apt update -qq > /dev/null 2>&1
+  sudo apt install -yqq curl jq wget > /dev/null 2>&1
   fi
   if [ -n "$(command -v pacman)" ]; then
-    echo "*** Detected Arch based Linux" 1>&2
-    sudo pacman --noconfirm --needed -Sy curl jq wget
+  echo "*** Detected Arch based Linux" 1>&2
+  sudo pacman --noconfirm --needed -Sy curl jq wget
   fi
   if [ ! $(which curl) ]; then
-    echo 'Please install "curl" package' 1>&2
-    exit 1
+  echo 'Please install "curl" package' 1>&2
+  exit 1
   fi
   if [ ! $(which wget) ]; then
-      echo 'Please install "wget" package' 1>&2
-      exit 1
-  fi
-  if [ ! $(which jq) ]; then
-    echo 'Please install "jq" package' 1>&2
+    echo 'Please install "wget" package' 1>&2
     exit 1
   fi
+  if [ ! $(which jq) ]; then
+  echo 'Please install "jq" package' 1>&2
+  exit 1
+  fi
   curl -sL https://api.github.com/repos/hashicorp/levant/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("amd64") and (contains("sha256") | not))).browser_download_url' | xargs -I {} \
-    sudo wget --quiet --no-cache -O /usr/local/bin/levant {}
+  sudo wget --quiet --no-cache -O /usr/local/bin/levant {}
   sudo chmod +x /usr/local/bin/levant
 fi
 source ~/.profile

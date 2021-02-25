@@ -25,15 +25,15 @@ fi
 if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
   paru --needed --removemake \
-    --cleanafter --noconfirm \
-    -Sy pandoc pandoc-completion git
+  --cleanafter --noconfirm \
+  -Sy pandoc pandoc-completion git
 fi
 if [ ! $(which git) ]; then
   echo 'Please install "git" package' 1>&2
   exit 1
 fi
 [ -r /opt/pandoc-latex-template ] ||  sudo git clone \
-    https://github.com/Wandmalfarbe/pandoc-latex-template /opt/pandoc-latex-template > /dev/null 2>&1
+  https://github.com/Wandmalfarbe/pandoc-latex-template /opt/pandoc-latex-template > /dev/null 2>&1
 sudo chown "$USER:$USER" /opt/pandoc-latex-template -R
 grep -q "pandoc" ~/.bashrc || echo "git -C /opt/pandoc-latex-template pull > /dev/null 2>&1" | tee -a ~/.bashrc > /dev/null
 [ -L /usr/share/pandoc/data/templates/eisvogel.latex ] || sudo ln \

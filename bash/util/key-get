@@ -15,16 +15,16 @@ missing_keys=$(apt update 2>&1 1>/dev/null|grep 'NO_PUBKEY'|grep -oE '[^ ]+$'); 
 missing_keys=$(echo "$missing_keys" | xargs -n1 | sort -u | xargs ); \
 key_count=$(echo "$missing_keys"|wc -w); \
 if [[ "$key_count" -gt 0 ]]; then \
-    for i in "$missing_keys"; do \
-    echo "Adding missing GPG key: $i"; \
-    apt-key adv --keyserver  "$key_server" --recv-keys "$i" >/dev/null 2>&1 ; \
-    if [[ "$?" -eq 0 ]]; then \
-        gpg -a --export "$i" | apt-key add - ; \
-        apt update ; \
-    else \
-        echo "Could not find GPG key $i"; \
-    fi \
-    done ; \
+  for i in "$missing_keys"; do \
+  echo "Adding missing GPG key: $i"; \
+  apt-key adv --keyserver  "$key_server" --recv-keys "$i" >/dev/null 2>&1 ; \
+  if [[ "$?" -eq 0 ]]; then \
+    gpg -a --export "$i" | apt-key add - ; \
+    apt update ; \
+  else \
+    echo "Could not find GPG key $i"; \
+  fi \
+  done ; \
 else \
   echo "No missing keys detected. Yaaaay" ; \
 fi

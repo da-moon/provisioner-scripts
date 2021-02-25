@@ -6,155 +6,155 @@ set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 function help() {
-    echo
-    echo "Usage: [$(basename "$0")] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
-    echo
-    echo
-    echo -e "[Synopsis]:\tdownloads and install latest version of hashicorp products"
-    echo "Optional Flags:"
-    echo
-    echo -e "  --skip\t\tproducts that you want to skip installation"
-    echo
-    echo "Example:"
-    echo
-    echo "  $(basename "$0") --skip otto --skip serf --skip otto --skip terraform"
-    echo
+  echo
+  echo "Usage: [$(basename "$0")] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
+  echo
+  echo
+  echo -e "[Synopsis]:\tdownloads and install latest version of hashicorp products"
+  echo "Optional Flags:"
+  echo
+  echo -e "  --skip\t\tproducts that you want to skip installation"
+  echo
+  echo "Example:"
+  echo
+  echo "  $(basename "$0") --skip otto --skip serf --skip otto --skip terraform"
+  echo
 }
 function main() {
   local skip=()
-    while [[ $# -gt 0 ]]; do
-    local key="$1"
-    case "$key" in
-    --skip)
-      shift
-      skip+=("${1}")
-      ;;
-    *)
-      help
-      exit
-      ;;
-    esac
+  while [[ $# -gt 0 ]]; do
+  local key="$1"
+  case "$key" in
+  --skip)
     shift
+    skip+=("${1}")
+    ;;
+  *)
+    help
+    exit
+    ;;
+  esac
+  shift
   done
-    if [ ! $(command -v sudo) ]; then
-    echo 'Please install "sudo" package' 1>&2
-    exit 1
+  if [ ! $(command -v sudo) ]; then
+  echo 'Please install "sudo" package' 1>&2
+  exit 1
   fi
   if [[ $EUID -eq 0 ]]; then
-    echo "You must run this script as non-root user with sudo permission." 1>&2
-    exit 1
+  echo "You must run this script as non-root user with sudo permission." 1>&2
+  exit 1
   fi
   if [ -n "$(command -v apt-get)" ]; then
-    echo "*** Detected Debian based Linux" 1>&2
-    export DEBIAN_FRONTEND=noninteractive
-      sudo apt update -qq > /dev/null 2>&1
-      sudo apt install -yqq curl jq aria2 unzip > /dev/null 2>&1
+  echo "*** Detected Debian based Linux" 1>&2
+  export DEBIAN_FRONTEND=noninteractive
+    sudo apt update -qq > /dev/null 2>&1
+    sudo apt install -yqq curl jq aria2 unzip > /dev/null 2>&1
   fi
   if [ -n "$(command -v paru)" ]; then
-    echo "*** Detected Arch based Linux" 1>&2
-    paru --needed --removemake \
-      --cleanafter --noconfirm \
-      -Sy unzip curl jq wget
+  echo "*** Detected Arch based Linux" 1>&2
+  paru --needed --removemake \
+    --cleanafter --noconfirm \
+    -Sy unzip curl jq wget
   fi
   if [ ! $(command -v curl) ]; then
-      echo 'Please install "curl" package' 1>&2
-      exit 1
+    echo 'Please install "curl" package' 1>&2
+    exit 1
   fi
   if [ ! $(command -v aria2c) ]; then
-      echo 'Please install "aria2" package' 1>&2
-      exit 1
+    echo 'Please install "aria2" package' 1>&2
+    exit 1
   fi
   if [ ! $(command -v jq) ]; then
-    echo 'Please install "jq" package' 1>&2
-    exit 1
+  echo 'Please install "jq" package' 1>&2
+  exit 1
   fi
   if [ ! $(command -v unzip) ]; then
-    echo 'Please install "unzip" package' 1>&2
-    exit 1
+  echo 'Please install "unzip" package' 1>&2
+  exit 1
   fi
   if [ ! $(command -v base64) ]; then
-    echo 'Please install "base64" package' 1>&2
-    exit 1
+  echo 'Please install "base64" package' 1>&2
+  exit 1
   fi
   if [ ! $(command -v find) ]; then
-    echo 'Please install "findutils" package' 1>&2
-    exit 1
+  echo 'Please install "findutils" package' 1>&2
+  exit 1
   fi
   if [ ! $(command -v uname) ]; then
-    echo 'Please install "uname" package' 1>&2
-    exit 1
+  echo 'Please install "uname" package' 1>&2
+  exit 1
   fi
   case "$OSTYPE" in
-    darwin*)  platform="darwin" ;; 
-    linux*)   platform="linux" ;;
-    *)        echo 'unsupported platform' 1>&2 && exit 1 ;;
+  darwin*)  platform="darwin" ;; 
+  linux*)   platform="linux" ;;
+  *)        echo 'unsupported platform' 1>&2 && exit 1 ;;
   esac
   arch="amd64"
   case "`uname -i`" in
-    i?86) arch="386";;
-    arm64) arch="arm64";;
+  i?86) arch="386";;
+  arm64) arch="arm64";;
   esac
   rm -rf /tmp/hashicorp
   mkdir -p /tmp/hashicorp
   pushd /tmp/hashicorp >/dev/null 2>&1
   latest_releases="$(curl -sL "https://releases.hashicorp.com/index.json" | jq -r "
   [
-    to_entries | 
-    map_values(.value + { slug: .key }) |
-    .[].versions |
-    to_entries | 
-    map_values(.value + { slug: .key }) |
-    [
-      .[].builds[] 
-      |select( 
-        (.version 
-        |( 
-          contains(\"ent\") or 
-          contains(\"beta\") or 
-          contains(\"rc\") or 
-          contains(\"techpreview\")
-        )|not
-      ) and (.os==\"${platform}\") 
-        and (.arch==\"${arch}\") 
-        and (.url | contains(\"zip\")) 
-        and (.version | contains(\"-\") | not) 
-        and (.name | ( contains(\"provider\") 
-        or contains(\"null\") 
-        or contains(\"-\"))|not))
-    ] | 
-    max_by(.version | [splits(\"[.]\")
+  to_entries | 
+  map_values(.value + { slug: .key }) |
+  .[].versions |
+  to_entries | 
+  map_values(.value + { slug: .key }) |
+  [
+    .[].builds[] 
+    |select( 
+    (.version 
+    |( 
+      contains(\"ent\") or 
+      contains(\"beta\") or 
+      contains(\"rc\") or 
+      contains(\"techpreview\")
+    )|not
+    ) and (.os==\"${platform}\") 
+    and (.arch==\"${arch}\") 
+    and (.url | contains(\"zip\")) 
+    and (.version | contains(\"-\") | not) 
+    and (.name | ( contains(\"provider\") 
+    or contains(\"null\") 
+    or contains(\"-\"))|not))
+  ] | 
+  max_by(.version | [splits(\"[.]\")
   ] | map(tonumber))] 
-    | del(.[] | nulls) 
-    | [
-        .[] 
-        | {
-            name: .name, 
-            url: .url
-          }
-      ]")"
+  | del(.[] | nulls) 
+  | [
+    .[] 
+    | {
+      name: .name, 
+      url: .url
+      }
+    ]")"
   for row in $(echo "${latest_releases}" | jq -r '.[] | @base64'); do
-    _jq() {
-      echo ${row} | base64 --decode | jq -r ${1}
-    }
-    name="$(_jq '.name')"
-    url="$(_jq '.url')"
-    if [[ ! -z "${skip+x}" ]]; then
-      if [[ " ${skip[@]} " =~ " ${name} " ]]; then
-      continue
-      fi
+  _jq() {
+    echo ${row} | base64 --decode | jq -r ${1}
+  }
+  name="$(_jq '.name')"
+  url="$(_jq '.url')"
+  if [[ ! -z "${skip+x}" ]]; then
+    if [[ " ${skip[@]} " =~ " ${name} " ]]; then
+    continue
     fi
-    echo "${url}" >>"/tmp/hashicorp/download.txt"
-    echo " dir=/tmp/hashicorp" >>"/tmp/hashicorp/download.txt"
-    echo " out=${name}.zip" >>"/tmp/hashicorp/download.txt"
+  fi
+  echo "${url}" >>"/tmp/hashicorp/download.txt"
+  echo " dir=/tmp/hashicorp" >>"/tmp/hashicorp/download.txt"
+  echo " out=${name}.zip" >>"/tmp/hashicorp/download.txt"
   done
   aria2c \
-    --optimize-concurrent-downloads \
-    -k 1M \
-    -j16 \
-    -x 16 \
-    -c \
-    --file-allocation=falloc \
-    -i "/tmp/hashicorp/download.txt"
+  --optimize-concurrent-downloads \
+  -k 1M \
+  -j16 \
+  -x 16 \
+  -c \
+  --file-allocation=falloc \
+  -i "/tmp/hashicorp/download.txt"
   find . -mindepth 1 -maxdepth 1 -type f -name '*.zip' | xargs -I {} -P `nproc` unzip -qq {}
   rm *.zip
   rm download.txt
@@ -167,7 +167,7 @@ if [ -z "${BASH_SOURCE+x}" ]; then
   exit $?
 else
   if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "${@}"
-    exit $?
+  main "${@}"
+  exit $?
   fi
 fi

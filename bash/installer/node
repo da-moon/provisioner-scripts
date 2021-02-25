@@ -23,18 +23,18 @@ if [ -n "$(command -v apt-get)" ]; then
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get install -yqq apt-utils curl lsb-release wget ca-certificates gnupg2 jq > /dev/null 2>&1
   if [ -n "$(command -v node)" ]; then
-    echo "*** node $(node --version) is installed" 1>&2
+  echo "*** node $(node --version) is installed" 1>&2
   else
-    wget -qO- https://deb.nodesource.com/setup_12.x | sudo bash - >/dev/null 2>&1
-    sudo apt-get install -yqq nodejs >/dev/null 2>&1
+  wget -qO- https://deb.nodesource.com/setup_12.x | sudo bash - >/dev/null 2>&1
+  sudo apt-get install -yqq nodejs >/dev/null 2>&1
   fi
   if [ -n "$(command -v yarn)" ]; then
-    echo "*** yarn $(yarn --version) is installed" 1>&2
+  echo "*** yarn $(yarn --version) is installed" 1>&2
   else
-    curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - >/dev/null 2>&1 
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list > /dev/null
-    sudo apt-get update -qq > /dev/null 2>&1
-    sudo apt-get install -yqq yarn >/dev/null 2>&1
+  curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - >/dev/null 2>&1 
+  echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list > /dev/null
+  sudo apt-get update -qq > /dev/null 2>&1
+  sudo apt-get install -yqq yarn >/dev/null 2>&1
   fi
 fi
 
