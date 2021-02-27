@@ -48,7 +48,7 @@ Vagrant.configure("2") do |config|
   # => enable nested virtualization
   vb.customize ["modifyvm",:id,"--nested-hw-virt", "on"]    
   override.vm.synced_folder ".", "#{synced_folder}",disabled: false,
-    auto_correct:true, owner: "vagrant",group: "vagrant",type: "virtualbox"
+  auto_correct:true, owner: "vagrant",group: "vagrant",type: "virtualbox"
   end
   # [ WARN ] => avoid hyper-v if you can. It is the worst hypervisor that I have worked with.
   # it has horerendous memory/cpu management. it makes my on my surface book 3 ( 32 GB RAM ) model , which is 
@@ -78,21 +78,21 @@ Vagrant.configure("2") do |config|
   # [ NOTE ] => https://askubuntu.com/questions/772784/9p-libvirt-qemu-share-modes
   # [ NOTE ] => ensuring vagrant user owns the folder
   override.vm.synced_folder ".", "#{synced_folder}", 
-    disabled: false,auto_correct:true, owner: "1000", group: "1000",
-    type: "9p",  accessmode: "passthrough" 
+  disabled: false,auto_correct:true, owner: "1000", group: "1000",
+  type: "9p",  accessmode: "passthrough" 
   override.vm.provision "shell",
-    privileged:true,
-    name:"p9-kernel-support",
-    inline: <<-SCRIPT
-    [ ! -L /usr/local/bin/modprobe ] && sudo ln -s /sbin/modprobe /usr/local/bin/modprobe
+  privileged:true,
+  name:"p9-kernel-support",
+  inline: <<-SCRIPT
+  [ ! -L /usr/local/bin/modprobe ] && sudo ln -s /sbin/modprobe /usr/local/bin/modprobe
   SCRIPT
 
   end if Vagrant.has_plugin?('vagrant-libvirt')
   forwarded_ports.each do |port|
   config.vm.network "forwarded_port", 
-    guest: port, 
-    host: port,
-    auto_correct: true
+  guest: port, 
+  host: port,
+  auto_correct: true
   end
   config.vm.provision "shell",
   privileged:false,
@@ -105,22 +105,22 @@ Vagrant.configure("2") do |config|
   # [ NOTE ] => downloading helper executable scripts
   utility_scripts.each do |utility|
   config.vm.provision "shell",
-    privileged:false,
-    name:"#{utility}-utility-script",
-    inline: <<-SCRIPT
+  privileged:false,
+  name:"#{utility}-utility-script",
+  inline: <<-SCRIPT
   [ -r /usr/local/bin/#{utility} ] || \
-    sudo curl -s \
-    -o /usr/local/bin/#{utility} \
-    #{UTIL_SCRIPTS_BASE}/#{utility} && \
-    sudo chmod +x /usr/local/bin/#{utility}
+  sudo curl -s \
+  -o /usr/local/bin/#{utility} \
+  #{UTIL_SCRIPTS_BASE}/#{utility} && \
+  sudo chmod +x /usr/local/bin/#{utility}
   SCRIPT
   end
   # [ NOTE ] => provisioning
   provisioners.each do |provisioner|
   config.vm.provision "shell",
-    privileged:false,
-    name:"#{provisioner}",
-    path: "#{INSTALLER_SCRIPTS_BASE}/#{provisioner}"
+  privileged:false,
+  name:"#{provisioner}",
+  path: "#{INSTALLER_SCRIPTS_BASE}/#{provisioner}"
   end
   config.trigger.after [:provision] do |t|
   t.info = "cleaning up after provisioning"

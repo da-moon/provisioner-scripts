@@ -31,8 +31,8 @@ if [ ! -n "$(command -v nu )" ]; then
   exit 1
   fi
   if [ ! $(which wget) ]; then
-    echo 'Please install "wget" package' 1>&2
-    exit 1
+  echo 'Please install "wget" package' 1>&2
+  exit 1
   fi
   if [ ! $(which jq) ]; then
   echo 'Please install "jq" package' 1>&2
@@ -42,9 +42,9 @@ if [ ! -n "$(command -v nu )" ]; then
   mkdir -p /tmp/nushell
   curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
   tar \
-    -xzf /tmp/nushell/nushell.tar.gz \
-    -C /tmp/nushell \
-    --strip-components=2
+  -xzf /tmp/nushell/nushell.tar.gz \
+  -C /tmp/nushell \
+  --strip-components=2
   rm -rf /tmp/nushell/nushell.tar.gz
   sudo mv /tmp/nushell/nu* /usr/local/bin/
   rm -rf /tmp/nushell

@@ -7,14 +7,14 @@ config:
   user.user-data: |
   #cloud-config
   runcmd:
-    - 'sed -i "s/; enable-shm = yes/enable-shm = no/g" /etc/pulse/client.conf'
-    - 'sed -i "/default-server\s*=/d" /etc/pulse/client.conf'
-    - 'echo "default-server = /home/ubuntu/pulse-native" | tee -a /etc/pulse/client.conf'
+  - 'sed -i "s/; enable-shm = yes/enable-shm = no/g" /etc/pulse/client.conf'
+  - 'sed -i "/default-server\s*=/d" /etc/pulse/client.conf'
+  - 'echo "default-server = /home/ubuntu/pulse-native" | tee -a /etc/pulse/client.conf'
   packages:
-    - x11-apps
-    - libgtk2.0-0
-    - mesa-utils
-    - pulseaudio
+  - x11-apps
+  - libgtk2.0-0
+  - mesa-utils
+  - pulseaudio
 description: GUI LXD profile
 devices:
   PASocket1:

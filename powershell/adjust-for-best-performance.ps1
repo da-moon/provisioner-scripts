@@ -221,21 +221,21 @@ $services_to_disable = @(
 function Confirm-Aria2 {
   if ((Get-Command "aria2c" -ErrorAction SilentlyContinue) -eq $null) 
   { 
-      warn "Unable to find aria2c in your PATH"
-      info "downloading aria2 with scoop"
-      scoop install aria2
+    warn "Unable to find aria2c in your PATH"
+    info "downloading aria2 with scoop"
+    scoop install aria2
   }
 }
 function aria2_dl($url,$dir,$file) {
   Confirm-Aria2
   try {
-      info "Downloading $file from $url and storing it in $dir"
-      aria2c -k 1M -c -j16 -x16 --dir="$dir" --out="$file" "$url"
-      success "Downloading $file from $url and storing it in $dir"
+    info "Downloading $file from $url and storing it in $dir"
+    aria2c -k 1M -c -j16 -x16 --dir="$dir" --out="$file" "$url"
+    success "Downloading $file from $url and storing it in $dir"
   }
   catch
   {
-      warn "could not downloading $file from $url"
+    warn "could not downloading $file from $url"
   }
 }
 function dl($url,$to) {
@@ -250,53 +250,53 @@ success "Disabling OneDrive..."
 }
 function Safe-Set-ItemProperty($Path,$Name,$Type,$Value) {
   try {
-      debug "setting path $Path with name $Name , type $Type and value $Value"
-      Set-ItemProperty -Path "$path" -Name "$Name" -Type $Type -Value $Value -ErrorAction Stop | Out-Null
+    debug "setting path $Path with name $Name , type $Type and value $Value"
+    Set-ItemProperty -Path "$path" -Name "$Name" -Type $Type -Value $Value -ErrorAction Stop | Out-Null
   }
   catch {
-      warn "could not set path $Path with name $Name , type $Type and value $Value"
+    warn "could not set path $Path with name $Name , type $Type and value $Value"
   }
 }
 function Safe-Remove-ItemProperty($Path,$Name,$Type,$Value) {
   try {
-      debug "removing item property $Name of $Path"
-      Remove-ItemProperty -Path "$path" -Name "$Name" -ErrorAction Stop | Out-Null
+    debug "removing item property $Name of $Path"
+    Remove-ItemProperty -Path "$path" -Name "$Name" -ErrorAction Stop | Out-Null
   }
   catch {
-      warn "could not removing item property $Name of $Path"
+    warn "could not removing item property $Name of $Path"
   }
 }
 function Safe-Uninstall($app) {
   try {
-      info "uninstalling $app"
-      Get-AppxPackage -all "$app" | Remove-AppxPackage -AllUsers
-      success "uninstalling $app"
+    info "uninstalling $app"
+    Get-AppxPackage -all "$app" | Remove-AppxPackage -AllUsers
+    success "uninstalling $app"
   }
   catch {
-      warn "uninstalling $app failed. possible cause is that $app was not installed at the time of executing $script_name script."
+    warn "uninstalling $app failed. possible cause is that $app was not installed at the time of executing $script_name script."
   }
 }
 function Create-Path-If-Not-Exists($Path) {
   try {
-      debug "checking if path $Path exists"
-      If (!(Test-Path "$Path")) {
-          debug "$Path does not exists. creating ..."
-          New-Item -Path "$Path" -Force -ErrorAction Stop | Out-Null
-      }
+    debug "checking if path $Path exists"
+    If (!(Test-Path "$Path")) {
+      debug "$Path does not exists. creating ..."
+      New-Item -Path "$Path" -Force -ErrorAction Stop | Out-Null
+    }
   }
   catch {
-      warn "could not create path $Path"
+    warn "could not create path $Path"
   }
 }
 Function DisableTelemetry {
   info "Disabling Telemetry..."
   $paths=@(
-      "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection",
-      "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-      "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection"
+    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection",
+    "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection",
+    "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection"
   )
   foreach($path in $paths) {
-      Safe-Set-ItemProperty "$path" "AllowTelemetry" DWord 0
+    Safe-Set-ItemProperty "$path" "AllowTelemetry" DWord 0
   }
   success "Disabling Telemetry..."
 }
@@ -304,11 +304,11 @@ Function DisableWiFiSense {
 info "Disabling Wi-Fi Sense..."
   Create-Path-If-Not-Exists "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting"
   $paths=@(
-      "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting",
-      "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowAutoConnectToWiFiSenseHotspots"
+    "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting",
+    "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowAutoConnectToWiFiSenseHotspots"
   )
   foreach($path in $paths) {
-      Safe-Set-ItemProperty  "$path" "Value" DWord 0
+    Safe-Set-ItemProperty  "$path" "Value" DWord 0
   }
 success "Disabling Wi-Fi Sense..."
 }
@@ -322,11 +322,11 @@ $edge = (Get-AppxPackage -AllUsers "Microsoft.MicrosoftEdge").PackageFamilyName
   $path="HKCU:\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\$edge\MicrosoftEdge\PhishingFilter"
   Create-Path-If-Not-Exists "$path"
   $names=@(
-      "EnabledV9" , 
-      "PreventOverride"
+    "EnabledV9" , 
+    "PreventOverride"
   )
   foreach($name in $names) {
-      Safe-Set-ItemProperty "$path" "$name" DWord 0
+    Safe-Set-ItemProperty "$path" "$name" DWord 0
   }
   success "Disabling SmartScreen Filter..."
 }
@@ -342,8 +342,8 @@ Function DisableBackgroundApps {
   info "Disabling Background application access..."
   $path="HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
   Get-ChildItem "$path" | ForEach-Object {
-      Safe-Set-ItemProperty $_.PsPath  "Disabled" DWord 1
-      Safe-Set-ItemProperty $_.PsPath  "DisabledByUser" DWord 1
+    Safe-Set-ItemProperty $_.PsPath  "Disabled" DWord 1
+    Safe-Set-ItemProperty $_.PsPath  "DisabledByUser" DWord 1
   }
   success "Disabling Background application access..."
 }
@@ -351,24 +351,24 @@ Function DisableLockScreenSpotlight {
   info "Disabling Lock screen spotlight..."
   $path="HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
   $names=@(
-      "RotatingLockScreenEnabled" , 
-      "RotatingLockScreenOverlayEnabled",
-      "SubscribedContent-338387Enabled"
+    "RotatingLockScreenEnabled" , 
+    "RotatingLockScreenOverlayEnabled",
+    "SubscribedContent-338387Enabled"
   )
   foreach($name in $names) {
-      Safe-Set-ItemProperty "$path" "$name" DWord 0
+    Safe-Set-ItemProperty "$path" "$name" DWord 0
   }
   success "Disabling Lock screen spotlight..."
 }
 Function DisableLocationTracking {
   info "Disabling Location Tracking..."
   $paths = @{
-      'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}' = 'SensorPermissionState'
-      'HKLM:\SYSTEM\CurrentControlSet\Services\lfsvc\Service\Configuration' = 'Status'
+    'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}' = 'SensorPermissionState'
+    'HKLM:\SYSTEM\CurrentControlSet\Services\lfsvc\Service\Configuration' = 'Status'
   }
   $paths.GetEnumerator() | ForEach-Object {
-      $path=$_.Key
-      Safe-Set-ItemProperty "$path"  $_.Value DWord 0
+    $path=$_.Key
+    Safe-Set-ItemProperty "$path"  $_.Value DWord 0
   }
   success "Disabling Location Tracking..."
 }
@@ -387,13 +387,13 @@ success "Disabling Feedback..."
 Function DisableAdvertisingID {
   info "Disabling Advertising ID..."
   $paths = @{
-      'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo' = 'Enabled'
-      'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy' = 'TailoredExperiencesWithDiagnosticDataEnabled'
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo' = 'Enabled'
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy' = 'TailoredExperiencesWithDiagnosticDataEnabled'
   }
   $paths.GetEnumerator() | ForEach-Object {
-      $path=$_.Key
-      Create-Path-If-Not-Exists "$path"
-      Safe-Set-ItemProperty "$path"  $_.Value DWord 0
+    $path=$_.Key
+    Create-Path-If-Not-Exists "$path"
+    Safe-Set-ItemProperty "$path"  $_.Value DWord 0
   }
 success "Disabling Advertising ID..."
 }
@@ -420,7 +420,7 @@ Function DisableAutoLogger {
 info "Removing AutoLogger file and restricting directory..."
 $autoLoggerDir = "$env:PROGRAMDATA\Microsoft\Diagnosis\ETLLogs\AutoLogger"
 # If (Test-Path "$autoLoggerDir\AutoLogger-Diagtrack-Listener.etl") {
-      Remove-Item  -Path "$autoLoggerDir\AutoLogger-Diagtrack-Listener.etl" -ErrorAction SilentlyContinue
+    Remove-Item  -Path "$autoLoggerDir\AutoLogger-Diagtrack-Listener.etl" -ErrorAction SilentlyContinue
 # }
 icacls $autoLoggerDir /deny SYSTEM:`(OI`)`(CI`)F | Out-Null
 success "Removing AutoLogger file and restricting directory..."
@@ -442,17 +442,17 @@ Function DisableAppSuggestions {
   info "Disabling Application suggestions..."
   $path="HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
   $names=@(
-      "ContentDeliveryAllowed",
-      "OemPreInstalledAppsEnabled" ,
-      "PreInstalledAppsEnabled",
-      "PreInstalledAppsEverEnabled" ,
-      "SilentInstalledAppsEnabled" ,
-      "SubscribedContent-338389Enabled" ,
-      "SystemPaneSuggestionsEnabled" ,
-      "SubscribedContent-338388Enabled" 
+    "ContentDeliveryAllowed",
+    "OemPreInstalledAppsEnabled" ,
+    "PreInstalledAppsEnabled",
+    "PreInstalledAppsEverEnabled" ,
+    "SilentInstalledAppsEnabled" ,
+    "SubscribedContent-338389Enabled" ,
+    "SystemPaneSuggestionsEnabled" ,
+    "SubscribedContent-338388Enabled" 
   )
   foreach($name in $names) {
-      Safe-Set-ItemProperty "$path" "$name" DWord 0
+    Safe-Set-ItemProperty "$path" "$name" DWord 0
   }
   Create-Path-If-Not-Exists "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
   Safe-Set-ItemProperty "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" "DisableWindowsConsumerFeatures" DWord 1
@@ -484,13 +484,13 @@ Function UninstallBloat {
   info "Removing Windows Bloatware ..."
   info "Uninstalling default Microsoft applications..."
   foreach($app in $microsoft_apps_to_remove) {
-      Safe-Uninstall "Microsoft.$app"
+    Safe-Uninstall "Microsoft.$app"
   }
   success "Uninstalling default Microsoft applications..."
 
   info "Uninstalling default third party applications..."
   foreach($app in $thirdparty_apps_to_remove) {
-      Safe-Uninstall "$app"
+    Safe-Uninstall "$app"
   }
   success "Uninstalling default third party applications..."
   info "Disabling Xbox ..."
@@ -608,8 +608,8 @@ info "Stopping and disabling Microsoft Compatibility Appraiser..."
 info "Disable compattelrunner.exe launched by scheduled tasks..."
   'Microsoft Compatibility Appraiser',
   'ProgramDataUpdater' | ForEach-Object {
-      Get-ScheduledTask -TaskName $_ -TaskPath '\Microsoft\Windows\Application Experience\' |
-      Disable-ScheduledTask | Out-Null
+    Get-ScheduledTask -TaskName $_ -TaskPath '\Microsoft\Windows\Application Experience\' |
+    Disable-ScheduledTask | Out-Null
   }
 success "Disable compattelrunner.exe launched by scheduled tasks..."
 info "Disable the Autologger session at the next computer restart"
@@ -631,28 +631,28 @@ Function EnableBigDesktopIcons {
 Function RemoveUnneededComponents {
   info "Disabling Optional Feature..."
   foreach ($feature in $optional_features_to_remove) {
-      try {
-          info "Disabling: $feature"
-          disable-windowsoptionalfeature -online -featureName $feature -NoRestart 
-          success "Disabling: $feature"
-      }
-      catch{
-          warn "could not disable $feature possibly due to fact that it does't exist."
-      }
+    try {
+      info "Disabling: $feature"
+      disable-windowsoptionalfeature -online -featureName $feature -NoRestart 
+      success "Disabling: $feature"
+    }
+    catch{
+      warn "could not disable $feature possibly due to fact that it does't exist."
+    }
   }
   success "Disabling Optional Feature..."
 }
 Function DisableGPDWinServices {
 info "Disabling extra services ..."
   $service="Spooler"
-      if (Get-Service $service -ErrorAction SilentlyContinue)
-      {
-          info "Stopping and disabling $service"
-          Stop-Service -Name $service
-          Get-Service -Name $service | Set-Service -StartupType Disabled
-      } else {
-          warn "Skipping $service (does not exist)"
-      }
+    if (Get-Service $service -ErrorAction SilentlyContinue)
+    {
+      info "Stopping and disabling $service"
+      Stop-Service -Name $service
+      Get-Service -Name $service | Set-Service -StartupType Disabled
+    } else {
+      warn "Skipping $service (does not exist)"
+    }
 success "Disabling extra services ..."
 }
 Function SetUACLow {
@@ -740,12 +740,12 @@ Function DisableAutoplay {
 Function EnableRemoteDesktop {
   info "Enabling Remote Desktop w/o Network Level Authentication..."
   $paths = @{
-      'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' = 'fDenyTSConnections'
-      'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' = 'UserAuthentication'
+    'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' = 'fDenyTSConnections'
+    'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' = 'UserAuthentication'
   }
   $paths.GetEnumerator() | ForEach-Object {
-      $path=$_.Key
-      Safe-Set-ItemProperty "$path"  $_.Value DWord 0
+    $path=$_.Key
+    Safe-Set-ItemProperty "$path"  $_.Value DWord 0
   }
   success "Enabling Remote Desktop w/o Network Level Authentication..."
 }
@@ -796,14 +796,14 @@ Function DisableFastStartup {
 Function DisableExtraServices {
 info "Disabling extra services ..."
   foreach ($service in $services_to_disable) {
-      if (Get-Service $service -ErrorAction SilentlyContinue)
-      {
-          info "Stopping and disabling $service"
-          Stop-Service -Name $service
-          Get-Service -Name $service | Set-Service -StartupType Disabled
-      } else {
-          warn "Skipping $service (does not exist)"
-      }
+    if (Get-Service $service -ErrorAction SilentlyContinue)
+    {
+      info "Stopping and disabling $service"
+      Stop-Service -Name $service
+      Get-Service -Name $service | Set-Service -StartupType Disabled
+    } else {
+      warn "Skipping $service (does not exist)"
+    }
   }
 success "Disabling extra services ..."
 }
@@ -924,8 +924,8 @@ $preferences = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentV
 If (!($preferences)) {
   $taskmgr = Start-Process -WindowStyle Hidden -FilePath taskmgr.exe -PassThru
   While (!($preferences)) {
-    Start-Sleep -m 250
-    $preferences = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "Preferences" -ErrorAction SilentlyContinue
+  Start-Sleep -m 250
+  $preferences = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "Preferences" -ErrorAction SilentlyContinue
   }
   Stop-Process $taskmgr
 }
@@ -938,7 +938,7 @@ info "Hiding task manager details..."
 $preferences = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "Preferences" -ErrorAction SilentlyContinue
 If ($preferences) {
   $preferences.Preferences[28] = 1
-      Safe-Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\TaskManager" "Preferences" Binary $preferences.Preferences
+    Safe-Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\TaskManager" "Preferences" Binary $preferences.Preferences
 }
 success "Hiding task manager details..."
 }
@@ -958,7 +958,7 @@ Function Hide3DObjectsFromThisPC {
   info "Hiding 3D Objects icon from This PC..."
   $path="HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}"
   # If (Test-Path "$path") {
-      Remove-Item  -Path "$path" -Recurse -ErrorAction SilentlyContinue
+    Remove-Item  -Path "$path" -Recurse -ErrorAction SilentlyContinue
   # }
   success "Hiding 3D Objects icon from This PC..."
 }
@@ -996,11 +996,11 @@ Function HideRecentShortcuts {
   info "Hiding recent shortcuts..."
   $path="HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer"
   $names=@(
-      "ShowRecent", 
-      "ShowFrequent"
+    "ShowRecent", 
+    "ShowFrequent"
   )
   foreach($name in $names) {
-      Safe-Set-ItemProperty "$path" "$name" DWord 0
+    Safe-Set-ItemProperty "$path" "$name" DWord 0
   }
   success "Hiding recent shortcuts..."
 }
@@ -1013,13 +1013,13 @@ Function SetExplorerThisPC {
 Function ShowThisPCOnDesktop {
   info "Showing This PC shortcut on desktop..."
   $paths = @{
-      'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' = '{20D04FE0-3AEA-1069-A2D8-08002B30309D}'
-      'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' = '{20D04FE0-3AEA-1069-A2D8-08002B30309D}'
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' = '{20D04FE0-3AEA-1069-A2D8-08002B30309D}'
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' = '{20D04FE0-3AEA-1069-A2D8-08002B30309D}'
   }
   $paths.GetEnumerator() | ForEach-Object {
-      $path=$_.Key
-      Create-Path-If-Not-Exists "$path"
-      Safe-Set-ItemProperty "$path"  $_.Value DWord 0
+    $path=$_.Key
+    Create-Path-If-Not-Exists "$path"
+    Safe-Set-ItemProperty "$path"  $_.Value DWord 0
   }
 success "Showing This PC shortcut on desktop..."
 }
@@ -1102,11 +1102,11 @@ Function ShowTaskbarSearchBox {
 Function SetDEPOptOut {
   info "Setting Data Execution Prevention (DEP) policy to OptOut..."
   try {
-      bcdedit /set `{current`} nx OptOut | Out-Null
-      success "Setting Data Execution Prevention (DEP) policy to OptOut..."
+    bcdedit /set `{current`} nx OptOut | Out-Null
+    success "Setting Data Execution Prevention (DEP) policy to OptOut..."
   }
   catch{
-      warn "could not ser Data Execution Prevention (DEP) policy to OptOut. Possibly, bcdedit was not present in path"
+    warn "could not ser Data Execution Prevention (DEP) policy to OptOut. Possibly, bcdedit was not present in path"
   }
 }
 foreach($tweak in $tweaks) {

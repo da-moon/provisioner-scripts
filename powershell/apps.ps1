@@ -106,14 +106,14 @@ function pwd($path) {
 
 function add_line_to_file([string] $line,[string] $path){
   if (-not(Test-Path -Path $path -PathType Leaf)) {
-    warn "The file [$path] does not exist.trying to create it."
-    try {
-      $null = New-Item -ItemType File -Path $path -Force -ErrorAction Stop
-      info "The file [$path] has been created."
-    }
-    catch {
-      throw $_.Exception.Message
-    }
+  warn "The file [$path] does not exist.trying to create it."
+  try {
+    $null = New-Item -ItemType File -Path $path -Force -ErrorAction Stop
+    info "The file [$path] has been created."
+  }
+  catch {
+    throw $_.Exception.Message
+  }
   }
 	If (!(Select-String -Path $path -pattern $line)){
 		$line | Out-File "$path"  -Encoding ascii -Append
@@ -127,26 +127,26 @@ function test_command([Parameter(Mandatory)][string]$command) {
 }
 function is_chocolatey_package_installed([Parameter(Mandatory)][string]$app) {
   $installed = choco list $app --local-only --no-progress | Where-Object {
-      # Alternate filter
-      #choco list  -localonly | Where-Object { ($_ -notmatch 'Chocolatey v[0-9\.]') -and $_ -notmatch '\d+ packages installed\.' }
-      $_ -match "$app\s.*"
+    # Alternate filter
+    #choco list  -localonly | Where-Object { ($_ -notmatch 'Chocolatey v[0-9\.]') -and $_ -notmatch '\d+ packages installed\.' }
+    $_ -match "$app\s.*"
   }
   return [bool](Write-Output (@($installed).Count -gt 0))
 }
 function is_scoop_package_installed([Parameter(Mandatory)][string]$app) {
   $scoopOutput = scoop export $app
   $installed = $scoopOutput | Where-Object {
-    # Alternate filter
-    #choco list  -localonly | Where-Object { ($_ -notmatch 'Chocolatey v[0-9\.]') -and $_ -notmatch '\d+ packages installed\.' }
-    $_ -match "\s*$app\s.*"
+  # Alternate filter
+  #choco list  -localonly | Where-Object { ($_ -notmatch 'Chocolatey v[0-9\.]') -and $_ -notmatch '\d+ packages installed\.' }
+  $_ -match "\s*$app\s.*"
   }
   return [bool](Write-Output (@($installed).Count -gt 0))
 }
 
 function scoop_install([string] $app) {
   if (is_scoop_package_installed "$app"){
-    warn "'$app' is installed. skipping."
-    return
+  warn "'$app' is installed. skipping."
+  return
   }
   info "Installing '$app' Software With scoop"
   scoop install --skip --global $app
@@ -155,8 +155,8 @@ function scoop_install([string] $app) {
 }
 function choco_install([string] $app) {
   if (is_chocolatey_package_installed "$app"){
-    warn "'$app' is installed. skipping."
-    return
+  warn "'$app' is installed. skipping."
+  return
   }
   info "Installing '$app' Software With Chocolatey"
   scoop install --skip --global $app
@@ -252,7 +252,7 @@ if ( test_command "choco" )
 	info "making sure chocolatey does not ask for approval before installing a package"
 	choco feature enable -n allowGlobalConfirmation
 	foreach($app in $chocolatey_software) {
-    choco_install $app
+  choco_install $app
   }
 }
 if ( test_command "code" ) 
@@ -299,22 +299,22 @@ if ( test_command "WindowsTerminal" )
   # $p = Start-Process WindowsTerminal -passthru
   if ( ! $p.WaitForExit(1000) ) 
   { 
-    info "killing 'windows-terminal' process after 1000ms";
-    # $p.Kill()
-    taskkill /T /F /PID $p.ID
-    # $p | Get-Member
-    success "windows-terminal was initialized";
+  info "killing 'windows-terminal' process after 1000ms";
+  # $p.Kill()
+  taskkill /T /F /PID $p.ID
+  # $p | Get-Member
+  success "windows-terminal was initialized";
   }
   Start-Sleep -Seconds 1.5
   (Get-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json" -ErrorAction SilentlyContinue ) | 
-    Foreach-Object {
-        $_ # send the current line to output
-        if ($_ -match "guid")
-        {
-            #Add Lines after the selected pattern 
-            '"colorScheme": "Solarized Dark",'
-        }
-    } | Set-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
+  Foreach-Object {
+    $_ # send the current line to output
+    if ($_ -match "guid")
+    {
+      #Add Lines after the selected pattern 
+      '"colorScheme": "Solarized Dark",'
+    }
+  } | Set-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
 }
 
 #'$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json'

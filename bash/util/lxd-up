@@ -129,19 +129,19 @@ config:
   user.user-data: |
   #cloud-config
   users:
-    - name: ${username}
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    groups: sudo
-    shell: /bin/bash
+  - name: ${username}
+  sudo: ['ALL=(ALL) NOPASSWD:ALL']
+  groups: sudo
+  shell: /bin/bash
   packages:
-    - sudo
-    - git
-    - curl
-    - wget
-    - jq
-    - ca-certificates
-    - openssh-server
-    - gnupg2
+  - sudo
+  - git
+  - curl
+  - wget
+  - jq
+  - ca-certificates
+  - openssh-server
+  - gnupg2
 description: "Nested LXD Profile"
 devices:
 devices:
@@ -713,9 +713,9 @@ function provision_nushell(){
   mkdir -p /tmp/nushell
   curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
   tar \
-    -xzf /tmp/nushell/nushell.tar.gz \
-    -C /tmp/nushell \
-    --strip-components=2
+  -xzf /tmp/nushell/nushell.tar.gz \
+  -C /tmp/nushell \
+  --strip-components=2
   rm -rf /tmp/nushell/nushell.tar.gz
   sudo mv /tmp/nushell/nu* /usr/local/bin/
   rm -rf /tmp/nushell
@@ -811,51 +811,51 @@ function main() {
   while [[ $# -gt 0 ]]; do
   local key="$1"
   case "$key" in
-    --name)
-    CONTAINER_NAME="$2"
-    shift
-    ;;
-    --username)
-    USERNAME="$2"
-    shift
-    ;;
-    --fedora)
-    FEDORA=true
-    ;;
-    --ssh-config)
-    SSH_CONFIG=true
-    ;;
-    --git)
-    GIT=true
-    ;;
-    --nu)
-    NU=true
-    ;;
-    --starship)
-    STARSHIP=true
-    ;;
-    --rg)
-    RG=true
-    ;;
-    --spacevim)
-    SPACEVIM=true
-    ;;
-    --goenv)
-    GOENV=true
-    ;;
-    --rbenv)
-    RBENV=true
-    ;;
-    --python)
-    PYTHON=true
-    ;;
-    --docker)
-    DOCKER=true
-    ;;
-    *)
-    help
-    exit 1
-    ;;
+  --name)
+  CONTAINER_NAME="$2"
+  shift
+  ;;
+  --username)
+  USERNAME="$2"
+  shift
+  ;;
+  --fedora)
+  FEDORA=true
+  ;;
+  --ssh-config)
+  SSH_CONFIG=true
+  ;;
+  --git)
+  GIT=true
+  ;;
+  --nu)
+  NU=true
+  ;;
+  --starship)
+  STARSHIP=true
+  ;;
+  --rg)
+  RG=true
+  ;;
+  --spacevim)
+  SPACEVIM=true
+  ;;
+  --goenv)
+  GOENV=true
+  ;;
+  --rbenv)
+  RBENV=true
+  ;;
+  --python)
+  PYTHON=true
+  ;;
+  --docker)
+  DOCKER=true
+  ;;
+  *)
+  help
+  exit 1
+  ;;
   esac
   shift
   done

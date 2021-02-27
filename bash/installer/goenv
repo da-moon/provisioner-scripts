@@ -33,11 +33,11 @@ else
   else
   [ -r ~/.goenv ] || git clone https://github.com/syndbg/goenv.git ~/.goenv > /dev/null 2>&1
   if ! grep -q "goenv" ~/.profile; then
-    echo 'git -C ~/.goenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
-    echo 'export GOENV_ROOT="$HOME/.goenv"' | tee -a ~/.profile > /dev/null
-    echo 'export PATH="$PATH:$GOENV_ROOT/bin"' | tee -a ~/.profile > /dev/null
-    echo 'eval "$(goenv init -)"' | tee -a ~/.profile > /dev/null
-    source ~/.profile
+  echo 'git -C ~/.goenv pull > /dev/null 2>&1' | tee -a ~/.profile > /dev/null
+  echo 'export GOENV_ROOT="$HOME/.goenv"' | tee -a ~/.profile > /dev/null
+  echo 'export PATH="$PATH:$GOENV_ROOT/bin"' | tee -a ~/.profile > /dev/null
+  echo 'eval "$(goenv init -)"' | tee -a ~/.profile > /dev/null
+  source ~/.profile
   fi
   fi
 fi

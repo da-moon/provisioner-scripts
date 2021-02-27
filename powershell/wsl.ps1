@@ -43,27 +43,27 @@ Function InstallScoop {
 function Confirm-Aria2 {
   if ((Get-Command "aria2c" -ErrorAction SilentlyContinue) -eq $null) 
   { 
-    warn "Unable to find aria2c in your PATH"
-    if ((Get-Command "scoop" -ErrorAction SilentlyContinue) -eq $null) 
-    { 
-      warn "Unable to find scoop in your PATH"
-      info "installing scoop"
-      InstallScoop
-    }
-    info "downloading aria2 with scoop"
-    scoop install aria2
+  warn "Unable to find aria2c in your PATH"
+  if ((Get-Command "scoop" -ErrorAction SilentlyContinue) -eq $null) 
+  { 
+    warn "Unable to find scoop in your PATH"
+    info "installing scoop"
+    InstallScoop
+  }
+  info "downloading aria2 with scoop"
+  scoop install aria2
   }
 }
 function aria2_dl($url,$dir,$file) {
   Confirm-Aria2
   try {
-    info "Downloading $file from $url and storing it in $dir"
-    aria2c -k 1M -c -j16 -x16 --dir="$dir" --out="$file" "$url"
-    success "Downloading $file from $url and storing it in $dir"
+  info "Downloading $file from $url and storing it in $dir"
+  aria2c -k 1M -c -j16 -x16 --dir="$dir" --out="$file" "$url"
+  success "Downloading $file from $url and storing it in $dir"
   }
   catch
   {
-    warn "could not downloading $file from $url"
+  warn "could not downloading $file from $url"
   }
 }
 function dl($url,$to) {
@@ -72,42 +72,42 @@ function dl($url,$to) {
 }
 function Safe-Set-ItemProperty($Path,$Name,$Type,$Value) {
   try {
-    debug "setting path $Path with name $Name , type $Type and value $Value"
-    Set-ItemProperty -Path "$path" -Name "$Name" -Type $Type -Value $Value -ErrorAction Stop | Out-Null
+  debug "setting path $Path with name $Name , type $Type and value $Value"
+  Set-ItemProperty -Path "$path" -Name "$Name" -Type $Type -Value $Value -ErrorAction Stop | Out-Null
   }
   catch {
-    warn "could not set path $Path with name $Name , type $Type and value $Value"
+  warn "could not set path $Path with name $Name , type $Type and value $Value"
   }
 }
 function Safe-Remove-ItemProperty($Path,$Name,$Type,$Value) {
   try {
-    debug "removing item property $Name of $Path"
-    Remove-ItemProperty -Path "$path" -Name "$Name" -ErrorAction Stop | Out-Null
+  debug "removing item property $Name of $Path"
+  Remove-ItemProperty -Path "$path" -Name "$Name" -ErrorAction Stop | Out-Null
   }
   catch {
-    warn "could not removing item property $Name of $Path"
+  warn "could not removing item property $Name of $Path"
   }
 }
 function Safe-Uninstall($app) {
   try {
-    info "uninstalling $app"
-    Get-AppxPackage -all "$app" | Remove-AppxPackage -AllUsers
-    success "uninstalling $app"
+  info "uninstalling $app"
+  Get-AppxPackage -all "$app" | Remove-AppxPackage -AllUsers
+  success "uninstalling $app"
   }
   catch {
-    warn "uninstalling $app failed. possible cause is that $app was not installed at the time of executing $script_name script."
+  warn "uninstalling $app failed. possible cause is that $app was not installed at the time of executing $script_name script."
   }
 }
 function Create-Path-If-Not-Exists($Path) {
   try {
-    debug "checking if path $Path exists"
-    If (!(Test-Path "$Path")) {
-      debug "$Path does not exists. creating ..."
-      New-Item -Path "$Path" -Force -ErrorAction Stop | Out-Null
-    }
+  debug "checking if path $Path exists"
+  If (!(Test-Path "$Path")) {
+    debug "$Path does not exists. creating ..."
+    New-Item -Path "$Path" -Force -ErrorAction Stop | Out-Null
+  }
   }
   catch {
-    warn "could not create path $Path"
+  warn "could not create path $Path"
   }
 }
 Function InstallLinuxSubsystem {
@@ -122,17 +122,17 @@ Function InstallLinuxSubsystem {
   $file="ubuntu.appx"
   aria2_dl "$url" "$dir" "$file"
   try {
-    info "installing $file"
-    Add-AppxPackage "$dir\$file"
-    success "installing $file"
-    info "cleaning up e $dir\$file"
-    Remove-Item -Path "$dir\$file" -Recurse -Force -ErrorAction SilentlyContinue
-    success "Installing Linux Subsystem..."
+  info "installing $file"
+  Add-AppxPackage "$dir\$file"
+  success "installing $file"
+  info "cleaning up e $dir\$file"
+  Remove-Item -Path "$dir\$file" -Recurse -Force -ErrorAction SilentlyContinue
+  success "Installing Linux Subsystem..."
   }
   catch{
-    warn "could not install $file"
-    info "cleaning up e $dir\$file"
-    Remove-Item -Path "$dir\$file" -Recurse -Force -ErrorAction SilentlyContinue
+  warn "could not install $file"
+  info "cleaning up e $dir\$file"
+  Remove-Item -Path "$dir\$file" -Recurse -Force -ErrorAction SilentlyContinue
   }
 }
 

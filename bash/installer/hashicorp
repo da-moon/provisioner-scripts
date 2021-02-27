@@ -26,13 +26,13 @@ function main() {
   local key="$1"
   case "$key" in
   --skip)
-    shift
-    skip+=("${1}")
-    ;;
+  shift
+  skip+=("${1}")
+  ;;
   *)
-    help
-    exit
-    ;;
+  help
+  exit
+  ;;
   esac
   shift
   done
@@ -47,22 +47,22 @@ function main() {
   if [ -n "$(command -v apt-get)" ]; then
   echo "*** Detected Debian based Linux" 1>&2
   export DEBIAN_FRONTEND=noninteractive
-    sudo apt update -qq > /dev/null 2>&1
-    sudo apt install -yqq curl jq aria2 unzip > /dev/null 2>&1
+  sudo apt update -qq > /dev/null 2>&1
+  sudo apt install -yqq curl jq aria2 unzip > /dev/null 2>&1
   fi
   if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
   paru --needed --removemake \
-    --cleanafter --noconfirm \
-    -Sy unzip curl jq wget
+  --cleanafter --noconfirm \
+  -Sy unzip curl jq wget
   fi
   if [ ! $(command -v curl) ]; then
-    echo 'Please install "curl" package' 1>&2
-    exit 1
+  echo 'Please install "curl" package' 1>&2
+  exit 1
   fi
   if [ ! $(command -v aria2c) ]; then
-    echo 'Please install "aria2" package' 1>&2
-    exit 1
+  echo 'Please install "aria2" package' 1>&2
+  exit 1
   fi
   if [ ! $(command -v jq) ]; then
   echo 'Please install "jq" package' 1>&2
@@ -105,43 +105,43 @@ function main() {
   to_entries | 
   map_values(.value + { slug: .key }) |
   [
-    .[].builds[] 
-    |select( 
-    (.version 
-    |( 
-      contains(\"ent\") or 
-      contains(\"beta\") or 
-      contains(\"rc\") or 
-      contains(\"techpreview\")
-    )|not
-    ) and (.os==\"${platform}\") 
-    and (.arch==\"${arch}\") 
-    and (.url | contains(\"zip\")) 
-    and (.version | contains(\"-\") | not) 
-    and (.name | ( contains(\"provider\") 
-    or contains(\"null\") 
-    or contains(\"-\"))|not))
+  .[].builds[] 
+  |select( 
+  (.version 
+  |( 
+    contains(\"ent\") or 
+    contains(\"beta\") or 
+    contains(\"rc\") or 
+    contains(\"techpreview\")
+  )|not
+  ) and (.os==\"${platform}\") 
+  and (.arch==\"${arch}\") 
+  and (.url | contains(\"zip\")) 
+  and (.version | contains(\"-\") | not) 
+  and (.name | ( contains(\"provider\") 
+  or contains(\"null\") 
+  or contains(\"-\"))|not))
   ] | 
   max_by(.version | [splits(\"[.]\")
   ] | map(tonumber))] 
   | del(.[] | nulls) 
   | [
-    .[] 
-    | {
-      name: .name, 
-      url: .url
-      }
-    ]")"
+  .[] 
+  | {
+    name: .name, 
+    url: .url
+    }
+  ]")"
   for row in $(echo "${latest_releases}" | jq -r '.[] | @base64'); do
   _jq() {
-    echo ${row} | base64 --decode | jq -r ${1}
+  echo ${row} | base64 --decode | jq -r ${1}
   }
   name="$(_jq '.name')"
   url="$(_jq '.url')"
   if [[ ! -z "${skip+x}" ]]; then
-    if [[ " ${skip[@]} " =~ " ${name} " ]]; then
-    continue
-    fi
+  if [[ " ${skip[@]} " =~ " ${name} " ]]; then
+  continue
+  fi
   fi
   echo "${url}" >>"/tmp/hashicorp/download.txt"
   echo " dir=/tmp/hashicorp" >>"/tmp/hashicorp/download.txt"

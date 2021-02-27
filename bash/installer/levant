@@ -53,8 +53,8 @@ else
   exit 1
   fi
   if [ ! $(which wget) ]; then
-    echo 'Please install "wget" package' 1>&2
-    exit 1
+  echo 'Please install "wget" package' 1>&2
+  exit 1
   fi
   if [ ! $(which jq) ]; then
   echo 'Please install "jq" package' 1>&2

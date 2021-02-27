@@ -31,9 +31,9 @@ if ((Read-Host "Are you sure all scoop apps had closed? y/N") -eq "y") {
   
   "Remove the `"current`" folder in scoop apps"
   Get-Item $env:USERPROFILE\scoop\apps\*\current | ForEach-Object {
-    if ($_.mode -eq "d-r--l") {
-    Remove-Item $_.FullName -Recurse -Force -Confirm:$false
-    }
+  if ($_.mode -eq "d-r--l") {
+  Remove-Item $_.FullName -Recurse -Force -Confirm:$false
+  }
   }
   
   "backup scoop - add scoop folder to archive"
