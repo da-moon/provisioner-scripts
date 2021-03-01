@@ -286,36 +286,36 @@ if ( test_command "starship" )
 	add_line_to_profile 'Invoke-Expression (&starship init powershell)'
 	 . $PROFILE.CurrentUserAllHosts
 }
-if ( test_command "WindowsTerminal" ) 
-{ 
-	info "windows-terminal detected. setting color scheme to Solarized Dark"
+# if ( test_command "WindowsTerminal" ) 
+# { 
+# 	info "windows-terminal detected. setting color scheme to Solarized Dark"
 
-  (Get-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json" -ErrorAction SilentlyContinue) | 
-  Select-String -pattern 'colorScheme' -notmatch | 
-  Out-File "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
-  Start-Sleep -Seconds 1.5
-  info "initializing windows-terminal";
-  $p = [diagnostics.process]::start("WindowsTerminal.exe")
-  # $p = Start-Process WindowsTerminal -passthru
-  if ( ! $p.WaitForExit(1000) ) 
-  { 
-  info "killing 'windows-terminal' process after 1000ms";
-  # $p.Kill()
-  taskkill /T /F /PID $p.ID
-  # $p | Get-Member
-  success "windows-terminal was initialized";
-  }
-  Start-Sleep -Seconds 1.5
-  (Get-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json" -ErrorAction SilentlyContinue ) | 
-  Foreach-Object {
-    $_ # send the current line to output
-    if ($_ -match "guid")
-    {
-      #Add Lines after the selected pattern 
-      '"colorScheme": "Solarized Dark",'
-    }
-  } | Set-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
-}
+#   (Get-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json" -ErrorAction SilentlyContinue) | 
+#   Select-String -pattern 'colorScheme' -notmatch | 
+#   Out-File "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
+#   Start-Sleep -Seconds 1.5
+#   info "initializing windows-terminal";
+#   $p = [diagnostics.process]::start("WindowsTerminal.exe")
+#   # $p = Start-Process WindowsTerminal -passthru
+#   if ( ! $p.WaitForExit(1000) ) 
+#   { 
+#   info "killing 'windows-terminal' process after 1000ms";
+#   # $p.Kill()
+#   taskkill /T /F /PID $p.ID
+#   # $p | Get-Member
+#   success "windows-terminal was initialized";
+#   }
+#   Start-Sleep -Seconds 1.5
+#   (Get-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json" -ErrorAction SilentlyContinue ) | 
+#   Foreach-Object {
+#     $_ # send the current line to output
+#     if ($_ -match "guid")
+#     {
+#       #Add Lines after the selected pattern 
+#       '"colorScheme": "Solarized Dark",'
+#     }
+#   } | Set-Content "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
+# }
 
 #'$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json'
 #"colorScheme": "Solarized Dark",
