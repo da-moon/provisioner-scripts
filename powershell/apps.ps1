@@ -220,8 +220,8 @@ if ((Get-ExecutionPolicy).ToString() -notin $allowedExecutionPolicy) {
   Write-Output "'Set-ExecutionPolicy RemoteSigned -scope CurrentUser'"
   break
 }
-install_chrome
-install_chrome_remote_desktop
+#install_chrome
+#install_chrome_remote_desktop
 if ( -Not (test_command "scoop") ) 
 { 
 	warn "Unable to find scoop in your PATH.installing scoop"
