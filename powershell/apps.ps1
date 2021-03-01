@@ -268,8 +268,6 @@ if ( test_command "code" )
 	git config --global core.editor "code --wait"
 	}
 }
-New-Item -ItemType Directory -Force -Path C:\Path\That\May\Or\May\Not\Exist
-
 if (test_command "terraform") 
 { 
 	info "Terraform detected. Adding aliases"
