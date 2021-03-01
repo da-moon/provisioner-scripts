@@ -105,9 +105,12 @@ function pwd($path) {
 }
 
 function add_line_to_file([string] $line,[string] $path){
+
   if (-not(Test-Path -Path $path -PathType Leaf)) {
   warn "The file [$path] does not exist.trying to create it."
   try {
+    $parent=Split-Path -parent $PROFILE.CurrentUserAllHosts 
+    New-Item -ItemType Directory -Force -Path $parent
     $null = New-Item -ItemType File -Path $path -Force -ErrorAction Stop
     info "The file [$path] has been created."
   }
@@ -265,6 +268,7 @@ if ( test_command "code" )
 	git config --global core.editor "code --wait"
 	}
 }
+New-Item -ItemType Directory -Force -Path C:\Path\That\May\Or\May\Not\Exist
 
 if (test_command "terraform") 
 { 
