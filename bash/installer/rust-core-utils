@@ -63,7 +63,7 @@ if [ ! -n "$(command -v rg )" ]; then
     unzip -d /tmp/exa /tmp/exa/exa.zip
     rm /tmp/exa/exa.zip
     sudo mv /tmp/exa/exa-linux-x86_64 /usr/local/bin/exa
-    exa --version
+    exa --version || true
     rm -rf /tmp/exa
     sudo chmod +x /usr/local/bin/exa || true
   fi
