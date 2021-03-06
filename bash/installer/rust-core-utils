@@ -13,12 +13,11 @@ if [[ $EUID -eq 0 ]]; then
    echo "You must run this script as non-root user with sudo permission." 1>&2
    exit 1
 fi
-  if [ -n "$(command -v apt-get)" ]; then
+if [ -n "$(command -v apt-get)" ]; then
   echo "*** Detected Debian based Linux" 1>&2
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq > /dev/null 2>&1
   sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
-  fi
 fi
 
 if [ ! -n "$(command -v rg )" ]; then
