@@ -88,7 +88,7 @@ if [ ! -n "$(command -v bat)" ]; then
               (
                 contains("linux")  and
                 contains("x86_64")  and
-                contains("gnu")  and
+                contains("musl")  and
                 (contains("sha256") | not)
               )
             ).browser_download_url' | xargs -I {} wget -qO /tmp/bat/bat.tar.gz {}
@@ -156,8 +156,7 @@ if [ ! -n "$(command -v sd)" ]; then
   rm -rf /tmp/sd
   sudo chmod +x /usr/local/bin/sd || true
 fi
-
-  if [ ! -n "$(command -v hyperfine)" ]; then
+if [ ! -n "$(command -v hyperfine)" ]; then
   echo "*** installing hyperfine" 1>&2
   rm -rf /tmp/hyperfine
   mkdir -p /tmp/hyperfine
@@ -181,7 +180,7 @@ fi
               (
                 contains("linux")  and
                 contains("x86_64")  and
-                contains("gnu")  and
+                contains("musl")  and
                 (contains("sha256") | not)
               )
             ).browser_download_url' | xargs -I {} wget -qO /tmp/hyperfine/hyperfine.tar.gz {}
@@ -194,4 +193,63 @@ fi
   fi
   rm -rf /tmp/hyperfine
   sudo chmod +x /usr/local/bin/hyperfine || true
+fi
+
+
+if [ ! -n "$(command -v fd)" ]; then
+  echo "*** installing fd" 1>&2
+  rm -rf /tmp/fd
+  mkdir -p /tmp/fd
+  if grep -qF 'debian' /etc/os-release; then
+    curl -sL https://api.github.com/repos/sharkdp/fd/releases/latest | jq -r '.assets[]|
+      select(
+        .browser_download_url |
+        (
+          contains("amd64")  and
+          contains("deb")  and
+          (contains("musl") | not) and
+          (contains("sha256") | not)
+        )
+      ).browser_download_url' | xargs -I {} wget -qO /tmp/fd/fd.deb {} > /dev/null 2>&1
+      sudo dpkg -i /tmp/fd/fd.deb
+      sudo apt -f install -yqq > /dev/null 2>&1
+  else
+    curl -sL https://api.github.com/repos/sharkdp/fd/releases/latest | jq -r '.assets[]|
+            select(
+              .browser_download_url |
+              (
+                contains("linux")  and
+                contains("x86_64")  and
+                contains("musl")  and
+                (contains("sha256") | not)
+              )
+            ).browser_download_url' | xargs -I {} wget -qO /tmp/fd/fd.tar.gz {}
+    tar \
+      -xzf /tmp/fd/fd.tar.gz \
+      -C /tmp/fd \
+      --strip-components=1
+    rm -rf /tmp/fd/fd.tar.gz
+    sudo mv /tmp/fd/fd /usr/local/bin/
+  fi
+  rm -rf /tmp/fd
+  sudo chmod +x /usr/local/bin/fd || true
+fi
+if [ ! -n "$(command -v procs)" ]; then
+  echo "*** installing procs" 1>&2
+  rm -rf /tmp/procs
+  mkdir -p /tmp/procs
+  curl -sL https://api.github.com/repos/dalance/procs/releases/latest | \
+    jq -r '.assets[]|
+          select(
+            .browser_download_url |
+            (
+              contains("lnx")  and
+              (contains("sha256") | not)
+            )
+          ).browser_download_url' | xargs -I {} wget -qO /tmp/procs/procs.zip {}
+  unzip -d /tmp/procs /tmp/procs/procs.zip
+  rm /tmp/procs/procs.zip
+  sudo mv /tmp/procs/procs /usr/local/bin/procs
+  rm -rf /tmp/procs
+  sudo chmod +x /usr/local/bin/procs || true
 fi
