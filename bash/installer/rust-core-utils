@@ -19,110 +19,70 @@ if [ -n "$(command -v apt-get)" ]; then
   sudo apt-get update -qq > /dev/null 2>&1
   sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
 fi
-
-if [ ! -n "$(command -v rg )" ]; then
-  if [ ! $(which curl) ]; then
+if [ ! $(which curl) ]; then
   echo 'Please install "curl" package' 1>&2
   exit 1
-  fi
-  if [ ! $(which wget) ]; then
+fi
+if [ ! $(which wget) ]; then
   echo 'Please install "wget" package' 1>&2
   exit 1
-  fi
-  if [ ! $(which jq) ]; then
+fi
+if [ ! $(which jq) ]; then
   echo 'Please install "jq" package' 1>&2
   exit 1
-  fi
-  if [ ! -n "$(command -v ripgrep)" ]; then
-    echo "*** installing ripgrep" 1>&2
-    rm -rf /tmp/ripgrep*
-    mkdir -p /tmp/ripgrep
-    curl -sL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("x86_64") and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget --quiet --no-cache -O /tmp/ripgrep.tar.gz {}
-    sudo tar \
-    -xzf /tmp/ripgrep.tar.gz \
-    -C /tmp/ripgrep \
-    --strip-components=1
-    sudo mv /tmp/ripgrep/rg /usr/local/bin/rg
-    sudo mv /tmp/ripgrep/complete/rg.bash  /etc/bash_completion.d/rg.bash
-    sudo chmod +x /usr/local/bin/rg
-    sudo rm -r /tmp/ripgrep*
-  fi
-  if [ ! -n "$(command -v exa)" ]; then
-    echo "*** installing exa" 1>&2
-    rm -rf /tmp/exa
-    mkdir -p /tmp/exa
-    curl -sL https://api.github.com/repos/ogham/exa/releases/latest | \
-      jq -r '.assets[]|
-            select(
-              .browser_download_url |
-              (
-                contains("linux")  and
-                (contains("sha256") | not)
-              )
-            ).browser_download_url' | xargs -I {} wget -qO /tmp/exa/exa.zip {}
-    unzip -d /tmp/exa /tmp/exa/exa.zip
-    rm /tmp/exa/exa.zip
-    sudo mv /tmp/exa/exa-linux-x86_64 /usr/local/bin/exa
-    rm -rf /tmp/exa
-    sudo chmod +x /usr/local/bin/exa || true
-  fi
-  if [ ! -n "$(command -v bat)" ]; then
-    echo "*** installing bat" 1>&2
-    rm -rf /tmp/bat
-    mkdir -p /tmp/bat
-    if grep -qF 'debian' /etc/os-release; then
-      curl -sL https://api.github.com/repos/sharkdp/bat/releases/latest | jq -r '.assets[]|
-        select(
-          .browser_download_url |
-          (
-            contains("amd64")  and
-            contains("deb")  and
-            (contains("musl") | not) and
-            (contains("sha256") | not)
-          )
-        ).browser_download_url' | xargs -I {} wget -qO /tmp/bat/bat.deb {} > /dev/null 2>&1
-        sudo dpkg -i /tmp/bat/bat.deb
-        sudo apt -f install -yqq > /dev/null 2>&1
-    else
-      curl -sL https://api.github.com/repos/sharkdp/bat/releases/latest | jq -r '.assets[]|
-              select(
-                .browser_download_url |
-                (
-                  contains("linux")  and
-                  contains("x86_64")  and
-                  contains("gnu")  and
-                  (contains("sha256") | not)
-                )
-              ).browser_download_url' | xargs -I {} wget -qO /tmp/bat/bat.tar.gz {}
-      tar \
-        -xzf /tmp/bat/bat.tar.gz \
-        -C /tmp/bat \
-        --strip-components=1
-      rm -rf /tmp/bat/bat.tar.gz
-      sudo mv /tmp/bat/bat /usr/local/bin/
-    fi
-    rm -rf /tmp/bat
-    sudo chmod +x /usr/local/bin/bat || true
-  fi
-  if [ ! -n "$(command -v nu)" ]; then
-    echo "*** installing nushell" 1>&2
-    rm -rf /tmp/nushell
-    mkdir -p /tmp/nushell
-    curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
-    tar \
-    -xzf /tmp/nushell/nushell.tar.gz \
-    -C /tmp/nushell \
-    --strip-components=2
-    rm -rf /tmp/nushell/nushell.tar.gz
-    sudo mv /tmp/nushell/nu* /usr/local/bin/
-    rm -rf /tmp/nushell
-    sudo chmod +x /usr/local/bin/nu* || true
-  fi
-  if [ ! -n "$(command -v ag)" ]; then
-    echo "*** installing angle-grinder" 1>&2
-    rm -rf /tmp/ag
-    mkdir -p /tmp/ag
-    curl -sL https://api.github.com/repos/rcoh/angle-grinder/releases/latest | jq -r '.assets[]|
+fi
+if [ ! -n "$(command -v ripgrep)" ]; then
+  echo "*** installing ripgrep" 1>&2
+  rm -rf /tmp/ripgrep*
+  mkdir -p /tmp/ripgrep
+  curl -sL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux") and contains("x86_64") and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget --quiet --no-cache -O /tmp/ripgrep.tar.gz {}
+  sudo tar \
+  -xzf /tmp/ripgrep.tar.gz \
+  -C /tmp/ripgrep \
+  --strip-components=1
+  sudo mv /tmp/ripgrep/rg /usr/local/bin/rg
+  sudo mv /tmp/ripgrep/complete/rg.bash  /etc/bash_completion.d/rg.bash
+  sudo chmod +x /usr/local/bin/rg
+  sudo rm -r /tmp/ripgrep*
+fi
+if [ ! -n "$(command -v exa)" ]; then
+  echo "*** installing exa" 1>&2
+  rm -rf /tmp/exa
+  mkdir -p /tmp/exa
+  curl -sL https://api.github.com/repos/ogham/exa/releases/latest | \
+    jq -r '.assets[]|
+          select(
+            .browser_download_url |
+            (
+              contains("linux")  and
+              (contains("sha256") | not)
+            )
+          ).browser_download_url' | xargs -I {} wget -qO /tmp/exa/exa.zip {}
+  unzip -d /tmp/exa /tmp/exa/exa.zip
+  rm /tmp/exa/exa.zip
+  sudo mv /tmp/exa/exa-linux-x86_64 /usr/local/bin/exa
+  rm -rf /tmp/exa
+  sudo chmod +x /usr/local/bin/exa || true
+fi
+if [ ! -n "$(command -v bat)" ]; then
+  echo "*** installing bat" 1>&2
+  rm -rf /tmp/bat
+  mkdir -p /tmp/bat
+  if grep -qF 'debian' /etc/os-release; then
+    curl -sL https://api.github.com/repos/sharkdp/bat/releases/latest | jq -r '.assets[]|
+      select(
+        .browser_download_url |
+        (
+          contains("amd64")  and
+          contains("deb")  and
+          (contains("musl") | not) and
+          (contains("sha256") | not)
+        )
+      ).browser_download_url' | xargs -I {} wget -qO /tmp/bat/bat.deb {} > /dev/null 2>&1
+      sudo dpkg -i /tmp/bat/bat.deb
+      sudo apt -f install -yqq > /dev/null 2>&1
+  else
+    curl -sL https://api.github.com/repos/sharkdp/bat/releases/latest | jq -r '.assets[]|
             select(
               .browser_download_url |
               (
@@ -131,71 +91,107 @@ if [ ! -n "$(command -v rg )" ]; then
                 contains("gnu")  and
                 (contains("sha256") | not)
               )
-            ).browser_download_url' | xargs -I {} wget -qO /tmp/ag/ag.tar.gz {}
+            ).browser_download_url' | xargs -I {} wget -qO /tmp/bat/bat.tar.gz {}
     tar \
-      -xzf /tmp/ag/ag.tar.gz \
-      -C /tmp/ag
-    rm -rf /tmp/ag/ag.tar.gz
-    sudo mv /tmp/ag/agrind /usr/local/bin/ag
-    rm -rf /tmp/agrind
-    sudo chmod +x /usr/local/bin/ag || true
-
+      -xzf /tmp/bat/bat.tar.gz \
+      -C /tmp/bat \
+      --strip-components=1
+    rm -rf /tmp/bat/bat.tar.gz
+    sudo mv /tmp/bat/bat /usr/local/bin/
   fi
-  if [ ! -n "$(command -v sd)" ]; then
-    echo "*** installing sd" 1>&2
-    rm -rf /tmp/sd
-    mkdir -p /tmp/sd
-    curl -sL https://api.github.com/repos/chmln/sd/releases/latest | jq -r '.assets[]|
+  rm -rf /tmp/bat
+  sudo chmod +x /usr/local/bin/bat || true
+fi
+if [ ! -n "$(command -v nu)" ]; then
+  echo "*** installing nushell" 1>&2
+  rm -rf /tmp/nushell
+  mkdir -p /tmp/nushell
+  curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
+  tar \
+  -xzf /tmp/nushell/nushell.tar.gz \
+  -C /tmp/nushell \
+  --strip-components=2
+  rm -rf /tmp/nushell/nushell.tar.gz
+  sudo mv /tmp/nushell/nu* /usr/local/bin/
+  rm -rf /tmp/nushell
+  sudo chmod +x /usr/local/bin/nu* || true
+fi
+if [ ! -n "$(command -v ag)" ]; then
+  echo "*** installing angle-grinder" 1>&2
+  rm -rf /tmp/ag
+  mkdir -p /tmp/ag
+  curl -sL https://api.github.com/repos/rcoh/angle-grinder/releases/latest | jq -r '.assets[]|
+          select(
+            .browser_download_url |
+            (
+              contains("linux")  and
+              contains("x86_64")  and
+              contains("gnu")  and
+              (contains("sha256") | not)
+            )
+          ).browser_download_url' | xargs -I {} wget -qO /tmp/ag/ag.tar.gz {}
+  tar \
+    -xzf /tmp/ag/ag.tar.gz \
+    -C /tmp/ag
+  rm -rf /tmp/ag/ag.tar.gz
+  sudo mv /tmp/ag/agrind /usr/local/bin/ag
+  rm -rf /tmp/agrind
+  sudo chmod +x /usr/local/bin/ag || true
+fi
+if [ ! -n "$(command -v sd)" ]; then
+  echo "*** installing sd" 1>&2
+  rm -rf /tmp/sd
+  mkdir -p /tmp/sd
+  curl -sL https://api.github.com/repos/chmln/sd/releases/latest | jq -r '.assets[]|
+          select(
+            .browser_download_url |
+            (
+              contains("linux")  and
+              contains("x86_64")  and
+              contains("musl")  and
+              (contains("sha256") | not)
+            )
+          ).browser_download_url' | xargs -I {} wget -qO /tmp/sd/sd {}
+  sudo mv /tmp/sd/sd /usr/local/bin/sd
+  rm -rf /tmp/sd
+  sudo chmod +x /usr/local/bin/sd || true
+fi
+
+  if [ ! -n "$(command -v hyperfine)" ]; then
+  echo "*** installing hyperfine" 1>&2
+  rm -rf /tmp/hyperfine
+  mkdir -p /tmp/hyperfine
+  if grep -qF 'debian' /etc/os-release; then
+    curl -sL https://api.github.com/repos/sharkdp/hyperfine/releases/latest | jq -r '.assets[]|
+      select(
+        .browser_download_url |
+        (
+          contains("amd64")  and
+          contains("deb")  and
+          (contains("musl") | not) and
+          (contains("sha256") | not)
+        )
+      ).browser_download_url' | xargs -I {} wget -qO /tmp/hyperfine/hyperfine.deb {} > /dev/null 2>&1
+      sudo dpkg -i /tmp/hyperfine/hyperfine.deb
+      sudo apt -f install -yqq > /dev/null 2>&1
+  else
+    curl -sL https://api.github.com/repos/sharkdp/hyperfine/releases/latest | jq -r '.assets[]|
             select(
               .browser_download_url |
               (
                 contains("linux")  and
                 contains("x86_64")  and
-                contains("musl")  and
+                contains("gnu")  and
                 (contains("sha256") | not)
               )
-            ).browser_download_url' | xargs -I {} wget -qO /tmp/sd/sd {}
-    sudo mv /tmp/sd/sd /usr/local/bin/sd
-    rm -rf /tmp/sd
-    sudo chmod +x /usr/local/bin/sd || true
+            ).browser_download_url' | xargs -I {} wget -qO /tmp/hyperfine/hyperfine.tar.gz {}
+    tar \
+      -xzf /tmp/hyperfine/hyperfine.tar.gz \
+      -C /tmp/hyperfine \
+      --strip-components=1
+    rm -rf /tmp/hyperfine/hyperfine.tar.gz
+    sudo mv /tmp/hyperfine/hyperfine /usr/local/bin/
   fi
-
-   if [ ! -n "$(command -v hyperfine)" ]; then
-    echo "*** installing hyperfine" 1>&2
-    rm -rf /tmp/hyperfine
-    mkdir -p /tmp/hyperfine
-    if grep -qF 'debian' /etc/os-release; then
-      curl -sL https://api.github.com/repos/sharkdp/hyperfine/releases/latest | jq -r '.assets[]|
-        select(
-          .browser_download_url |
-          (
-            contains("amd64")  and
-            contains("deb")  and
-            (contains("musl") | not) and
-            (contains("sha256") | not)
-          )
-        ).browser_download_url' | xargs -I {} wget -qO /tmp/hyperfine/hyperfine.deb {} > /dev/null 2>&1
-        sudo dpkg -i /tmp/hyperfine/hyperfine.deb
-        sudo apt -f install -yqq > /dev/null 2>&1
-    else
-      curl -sL https://api.github.com/repos/sharkdp/hyperfine/releases/latest | jq -r '.assets[]|
-              select(
-                .browser_download_url |
-                (
-                  contains("linux")  and
-                  contains("x86_64")  and
-                  contains("gnu")  and
-                  (contains("sha256") | not)
-                )
-              ).browser_download_url' | xargs -I {} wget -qO /tmp/hyperfine/hyperfine.tar.gz {}
-      tar \
-        -xzf /tmp/hyperfine/hyperfine.tar.gz \
-        -C /tmp/hyperfine \
-        --strip-components=1
-      rm -rf /tmp/hyperfine/hyperfine.tar.gz
-      sudo mv /tmp/hyperfine/hyperfine /usr/local/bin/
-    fi
-    rm -rf /tmp/hyperfine
-    sudo chmod +x /usr/local/bin/hyperfine || true
-  fi
+  rm -rf /tmp/hyperfine
+  sudo chmod +x /usr/local/bin/hyperfine || true
 fi
