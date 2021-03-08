@@ -124,7 +124,6 @@ config:
   security.privileged: "true"
 description: "LXD profile for Kubernetes"
 devices:
-devices:
   eth0:
   name: eth0
   nictype: bridged
