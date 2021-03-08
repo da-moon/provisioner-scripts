@@ -5,7 +5,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-export NIGHTLY_VERSION=nightly-2021-01-01
 if [ ! $(which sudo) ]; then
 	echo 'Please install "sudo" package' 1>&2
 	exit 1
@@ -20,16 +19,16 @@ if [ -n "$(command -v apt-get)" ]; then
   sudo apt-get update -qq > /dev/null 2>&1
   sudo apt-get install -yqq git wget curl > /dev/null 2>&1
 fi
-echo '*** installing kubectl'
+echo >&2 '*** installing kubectl'
 sudo wget \
   -qO /usr/local/bin/kubectl \
   "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
 sudo chmod +x /usr/local/bin/kubectl
-echo '*** installing minikube'
+echo >&2 '*** installing minikube'
 sudo wget \
   -qO /usr/local/bin/minikube \
   https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 sudo chmod +x /usr/local/bin/minikube
-echo '*** install helm'
+echo >&2 '*** install helm'
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
