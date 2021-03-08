@@ -103,59 +103,60 @@ function assert_not_empty() {
   log_info "'$arg_name' -> $arg_value"
 }
 function create_debian_profile(){
-  if ! lxc storage show debian_privileged > /dev/null 2>&1 ;then
-  log_info "creating debian_privileged storage pool"
-  lxc storage create debian_privileged dir > /dev/null 2>&1
+  if ! lxc storage show k8s > /dev/null 2>&1 ;then
+    log_info "creating k8s storage pool"
+    lxc storage create k8s dir > /dev/null 2>&1
   fi
-  if ! lxc profile show debian_privileged > /dev/null 2>&1 ;then
-  log_info "creating debian_privileged profile"
-  lxc profile create debian_privileged > /dev/null 2>&1 
-  cat << EOF | lxc profile edit debian_privileged
-name: debian_privileged
+  if ! lxc profile show k8s > /dev/null 2>&1 ;then
+    log_info "creating k8s profile"
+    lxc profile create k8s > /dev/null 2>&1 
+    cat << EOF | lxc profile edit k8s
+name: k8s
 config:
   boot.autostart: "true"
   linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
   raw.lxc: |
-  lxc.apparmor.profile=unconfined
-  lxc.mount.auto=proc:rw sys:rw cgroup:rw
-  lxc.cgroup.devices.allow=a
-  lxc.cap.drop=
+    lxc.apparmor.profile=unconfined
+    lxc.mount.auto=proc:rw sys:rw cgroup:rw
+    lxc.cgroup.devices.allow=a
+    lxc.cap.drop=
   security.nesting: "true"
   security.privileged: "true"
 description: "LXD profile for Kubernetes"
 devices:
+devices:
   eth0:
-  name: eth0
-  nictype: bridged
-  parent: lxdbr0
-  type: nic
+    name: eth0
+    nictype: bridged
+    parent: lxdbr0
+    type: nic
   root:
-  path: /
-  pool: debian_privileged
-  type: disk
+    path: /
+    pool: k8s
+    type: disk
   aadisable:
-  path: /sys/module/nf_conntrack/parameters/hashsize
-  source: /sys/module/nf_conntrack/parameters/hashsize
-  type: disk
+    path: /sys/module/nf_conntrack/parameters/hashsize
+    source: /sys/module/nf_conntrack/parameters/hashsize
+    type: disk
   aadisable1:
-  path: /sys/module/apparmor/parameters/enabled
-  source: /dev/null
-  type: disk
+    path: /sys/module/apparmor/parameters/enabled
+    source: /dev/null
+    type: disk
   aadisable2:
-  path: /dev/kmsg
-  source: /dev/kmsg
-  type: disk
+    path: /dev/kmsg
+    source: /dev/kmsg
+    type: disk
   aadisable3:
-  path: /sys/fs/bpf
-  source: /sys/fs/bpf
-  type: disk
+    path: /sys/fs/bpf
+    source: /sys/fs/bpf
+    type: disk
 EOF
   fi
 }
 function launch_debian() {
 	local -r container_name="$1"
   log_info "launching container '$container_name'"
-	lxc launch images:debian/buster "${container_name}" --profile=debian_privileged || lxc start "${container_name}"
+	lxc launch images:debian/buster "${container_name}" --profile=k8s || lxc start "${container_name}"
 }
 function provision_base(){
 	local -r container_name="$1"
