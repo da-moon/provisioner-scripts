@@ -112,10 +112,10 @@ function pwd($path) {
 
 function add_line_to_file([string] $line,[string] $path){
   $parent=Split-Path -parent $path 
-  if (-not(Test-Path -Path $parent -PathType Directory)) {
+  if (-not(Test-Path -Path $parent -PathType Container)) {
     warn "The directory [$parent] does not exist.trying to create it."
     try {
-      $null = New-Item -ItemType Directory -Path $parent -ErrorAction Stop
+      $null = New-Item -ItemType Directory -Path $parent -Force -ErrorAction Stop
       info "The directory [$parent] has been created."
     }
     catch {
