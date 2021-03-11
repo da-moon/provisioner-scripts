@@ -35,6 +35,7 @@ $development_tools = @(
   "nano",
   "vscode",
   "nodejs",
+  "python",
   "yarn"
 )
 
@@ -70,6 +71,11 @@ $gui_software = @(
   "vcxsrv",
   "slack",
   "firefox"
+)
+$python_software = @(
+  "ansible",
+  "ansible-lint",
+  "ansible-tower-cli"
 )
 
 $scoop_software = `
@@ -269,6 +275,14 @@ if ( test_command "choco" )
 	choco feature enable -n allowGlobalConfirmation
 	foreach($app in $chocolatey_software) {
   choco_install $app
+  }
+}
+if ( test_command "pip3" ) 
+{
+  foreach($app in $python_software) {
+      info "installing [$app]."
+      pip3 install $app
+      info "[$app] install was successful."
   }
 }
 if ( test_command "code" ) 
