@@ -111,18 +111,25 @@ function pwd($path) {
 }
 
 function add_line_to_file([string] $line,[string] $path){
-
+  $parent=Split-Path -parent $path 
+  if (-not(Test-Path -Path $parent -PathType Directory)) {
+    warn "The directory [$parent] does not exist.trying to create it."
+    try {
+      $null = New-Item -ItemType Directory -Path $parent -ErrorAction Stop
+      info "The directory [$parent] has been created."
+    }
+    catch {
+      throw $_.Exception.Message
+    }
+  }
   if (-not(Test-Path -Path $path -PathType Leaf)) {
-  warn "The file [$path] does not exist.trying to create it."
-  try {
-    $parent=Split-Path -parent $PROFILE.CurrentUserAllHosts 
-    New-Item -ItemType Directory -Force -Path $parent
-    $null = New-Item -ItemType File -Path $path -Force -ErrorAction Stop
-    info "The file [$path] has been created."
-  }
-  catch {
-    throw $_.Exception.Message
-  }
+    try {
+      $null = New-Item -ItemType File -Path $path -Force -ErrorAction Stop
+      info "The file [$path] has been created."
+    }
+    catch {
+      throw $_.Exception.Message
+    }
   }
 	If (!(Select-String -Path $path -pattern $line)){
 		$line | Out-File "$path"  -Encoding ascii -Append
