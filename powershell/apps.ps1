@@ -1,10 +1,16 @@
 #Requires -Version 5
+# ────────────────────────────────────────────────────────────────────────────────
+# powershell -executionpolicy bypass -File apps.ps1
+# ────────────────────────────────────────────────────────────────────────────────
+#	Set-ExecutionPolicy RemoteSigned -scope CurrentUser
+#	iwr -useb 'https://raw.githubusercontent.com/da-moon/provisioner-scripts/master/powershell/apps.ps1'| iex
+# ────────────────────────────────────────────────────────────────────────────────
+
 # Check OS and ensure we are running on Windows
 if (-Not ($Env:OS -eq "Windows_NT")) {
   Write-Host "Error: This script only supports Windows machines. Exiting..."
   exit 1
 }
-# powershell -executionpolicy bypass -File apps.ps1
 # Start-Process powershell -ArgumentList "scoop install --skip --global $app" -Wait -NoNewWindow
 # [ NOTE ] 
 #   - https://github.com/benallred/configs/blob/master/config-functions.ps1
