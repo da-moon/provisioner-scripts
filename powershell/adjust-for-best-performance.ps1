@@ -1,11 +1,16 @@
 #Requires -Version 5
+# ────────────────────────────────────────────────────────────────────────────────
+# powershell -executionpolicy bypass -File adjust-for-best-performance.ps1
+# ────────────────────────────────────────────────────────────────────────────────
+#	Set-ExecutionPolicy RemoteSigned -scope CurrentUser
+#	iwr -useb 'https://raw.githubusercontent.com/da-moon/provisioner-scripts/master/powershell/adjust-for-best-performance.ps1'| iex
+# ────────────────────────────────────────────────────────────────────────────────
+
 # Check OS and ensure we are running on Windows
 if (-Not ($Env:OS -eq "Windows_NT")) {
   Write-Host "Error: This script only supports Windows machines. Exiting..."
   exit 1
 }
-# powershell -executionpolicy bypass -File adjust-for-best-performance.ps1
-
 function abort($msg, [int] $exit_code=1) { 
   write-host $msg -f red
   exit $exit_code
