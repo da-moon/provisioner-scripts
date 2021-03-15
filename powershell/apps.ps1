@@ -325,6 +325,8 @@ if ( test_command "starship" )
 	add_line_to_profile 'Invoke-Expression (&starship init powershell)'
 	 . $PROFILE.CurrentUserAllHosts
 }
+Add-WindowsCapability -Online -Name OpenSSH.Client*
+
 # if ( test_command "WindowsTerminal" ) 
 # { 
 # 	info "windows-terminal detected. setting color scheme to Solarized Dark"
