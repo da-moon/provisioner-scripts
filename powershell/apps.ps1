@@ -72,6 +72,14 @@ $gui_software = @(
   "slack",
   "firefox"
 )
+$fonts = @(
+  "Cascadia-Code",
+  "Cascadia-Mono",
+  "Cascadia-PL",
+  "Cascadia-MonoPL"
+)
+
+
 $python_software = @(
   "ansible",
   "ansible-lint",
@@ -84,7 +92,8 @@ $scoop_software = `
   $network_tools + `
   $devops_tools + `
   $rust_cli_tools + `
-  $gui_software
+  $gui_software + `
+  $fonts
 # [ NOTE ] install docker in wsl
 # sudo apt-get install docker-ce=18.06.1~ce~3-0~ubuntu
 # [ NOTE ] docker-toolbox guide
@@ -257,8 +266,10 @@ if ( test_command "scoop" )
   scoop_install "git"
 	info "ensuring scoop 'extras' bucket is added"
   scoop bucket add extras
-	foreach($app in $scoop_software) {
-		scoop_install $app 
+	info "ensuring scoop 'nerd-fonts' bucket is added"
+  scoop bucket add nerd-fonts
+  foreach($app in $scoop_software) {
+	  scoop_install $app 
 	}
 }
 # [ NOTE ] https://stackoverflow.com/questions/46758437/how-to-refresh-the-environment-of-a-powershell-session-after-a-chocolatey-instal
