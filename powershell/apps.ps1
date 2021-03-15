@@ -74,9 +74,7 @@ $gui_software = @(
 )
 $fonts = @(
   "Cascadia-Code",
-  "Cascadia-Mono",
-  "Cascadia-PL",
-  "Cascadia-MonoPL"
+  "Cascadia-Mono"
 )
 
 
