@@ -27,6 +27,7 @@ $core_cli_tools = @(
   "coreutils",
   "dd",
   "win32-openssh",
+  "git-with-openssh",
   "shasum"
 )
 
