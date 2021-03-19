@@ -18,7 +18,7 @@ if [ -n "$(command -v apt-get)" ]; then
 	export DEBIAN_FRONTEND=noninteractive
 	sudo apt-get update -qq > /dev/null 2>&1
 	sudo apt-get install -yqq apt-utils curl lsb-release wget ca-certificates gnupg2 jq > /dev/null 2>&1
-	echo "deb [arch=amd64] https://download.virtualbox.org/virtualbox/$(lsb_release -is | tr '[[:upper:]]' '[[:lower:]]') $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list > /dev/null
+	echo "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian bionic contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list > /dev/null
 	wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -  >/dev/null 2>&1
 	wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -  >/dev/null 2>&1
 	sudo apt-get update -qq > /dev/null 2>&1
