@@ -13,23 +13,16 @@ if [[ $EUID -eq 0 ]]; then
    echo "You must run this script as non-root user with sudo permission." 1>&2
    exit 1
 fi
-if [ -n "$(command -v paru)" ]; then
-  echo "*** Detected Arch based Linux" 1>&2
-  paru --needed --removemake --cleanafter --noconfirm -Sy docker docker-compose
-else
-  if [ -n "$(command -v apt-get)" ]; then
-  echo "*** Detected Debian based Linux" 1>&2
-  export DEBIAN_FRONTEND=noninteractive
+if [ -n "$(command -v apt-get)" ]; then
   sudo install-packages apt-utils curl lsb-release wget ca-certificates gnupg2 jq slirp4netns
   osname=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
   osrelease=$(lsb_release -cs)
   curl -fsSL https://download.docker.com/linux/"$osname"/gpg | sudo apt-key add - 
-  echo "deb [arch=amd64] https://download.docker.com/linux/$osname $osrelease stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  echo "deb [arch=amd64] https://download.docker.com/linux/$osname $osrelease stable" | sudo tee /etc/apt/sources.list.d/docker.list
   sudo install-packages docker-ce docker-ce-cli containerd.io
-  fi
-  sudo curl -sL "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  curl -sL https://api.github.com/repos/docker/compose/releases/latest | jq -r ".assets[]|select(.browser_download_url | contains(\"$(uname -s)\") and contains(\"$(uname -m)\") and contains(\"x86_64\") and (contains(\"sha256\")|not)).browser_download_url" | \
-  xargs -I {} sudo wget --quiet --no-cache -O /usr/local/bin/docker-compose {}
-  sudo chmod +x /usr/local/bin/docker-compose 
 fi
+sudo curl -sL "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+curl -sL https://api.github.com/repos/docker/compose/releases/latest | jq -r ".assets[]|select(.browser_download_url | contains(\"$(uname -s)\") and contains(\"$(uname -m)\") and contains(\"x86_64\") and (contains(\"sha256\")|not)).browser_download_url" | \
+xargs -I {} sudo wget --quiet --no-cache -O /usr/local/bin/docker-compose {}
+sudo chmod +x /usr/local/bin/docker-compose 
 sudo usermod -aG docker "$(whoami)"
