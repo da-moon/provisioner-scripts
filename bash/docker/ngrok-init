@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -o errtrace
+set -o functrace
+set -o errexit
+set -o nounset
+set -o pipefail
+# ────────────────────────────────────────────────────────────────────────────────
+# Description:  installs and starts up ngrok
+# Usage:        ngrok-init && ngrok start --all
+# ────────────────────────────────────────────────────────────────────────────────
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+if [ ! $(which wget) ]; then
+	echo 'Please install wget package'
+	exit 1
+fi
+if [ ! $(which unzip) ]; then
+	echo 'Please install zip package'
+	exit 1
+fi
+while [ -z "${NGROK_TOKEN+x}" ] ; do
+  printf "\n❗ The NGROK_TOKEN environment variable is required. Please enter its value.\n" &&
+  read -s -p "NGROK_TOKEN: " NGROK_TOKEN ;
+done ; export NGROK_TOKEN="$NGROK_TOKEN" && printf "\n'NGROK_TOKEN' environment variable was set successfully\n";
+sudo rm -rf /usr/local/bin/ngrok.zip
+sudo rm -rf /usr/local/bin/ngrok
+sudo wget -qO /usr/local/bin/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+sudo unzip -qqd /usr/local/bin /usr/local/bin/ngrok.zip
+sudo rm -rf /usr/local/bin/ngrok.zip
+ngrok --version
+# [NOTE] => ngrok setup
+rm -rf ~/.ngrok2
+mkdir -p ~/.ngrok2
+mkdir -p $HOME/.local/log
+cat << EOF | tee ~/.ngrok2/ngrok.yml > /dev/null
+authtoken: "${NGROK_TOKEN}"
+log_level: info
+log_format: json
+log: $HOME/.local/log/ngrok.log
+tunnels:
+  ssh:
+    proto: tcp
+    addr: 22
+#  myapp-http:
+#    addr: 80
+#    proto: http
+#    hostname: example.com
+#    auth: "user:secretpassword"
+#    bind_tls: false
+#  myapp-https:
+#    addr: 443
+#    proto: tls
+#    hostname: example.com
+EOF
