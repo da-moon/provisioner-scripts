@@ -102,20 +102,6 @@ if [ ! -n "$(command -v bat)" ]; then
   fi
   rm -rf /tmp/bat
 fi
-if [ ! -n "$(command -v nu)" ]; then
-  echo "*** installing nushell" 1>&2
-  rm -rf /tmp/nushell
-  mkdir -p /tmp/nushell
-  curl -sL https://api.github.com/repos/nushell/nushell/releases/latest | jq -r '.assets[]|select(.browser_download_url | (contains("linux")  and (contains("sha256") | not))).browser_download_url' | xargs -I {} wget -qO /tmp/nushell/nushell.tar.gz {}
-  tar \
-  -xzf /tmp/nushell/nushell.tar.gz \
-  -C /tmp/nushell \
-  --strip-components=2
-  rm -rf /tmp/nushell/nushell.tar.gz
-  sudo mv /tmp/nushell/nu* /usr/local/bin/
-  rm -rf /tmp/nushell
-  sudo chmod +x /usr/local/bin/nu* || true
-fi
 if [ ! -n "$(command -v ag)" ]; then
   echo "*** installing angle-grinder" 1>&2
   rm -rf /tmp/ag
