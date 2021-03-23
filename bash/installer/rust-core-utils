@@ -98,9 +98,9 @@ if [ ! -n "$(command -v bat)" ]; then
       --strip-components=1
     rm -rf /tmp/bat/bat.tar.gz
     sudo mv /tmp/bat/bat /usr/local/bin/
+    sudo chmod +x /usr/local/bin/bat || true
   fi
   rm -rf /tmp/bat
-  sudo chmod +x /usr/local/bin/bat || true
 fi
 if [ ! -n "$(command -v nu)" ]; then
   echo "*** installing nushell" 1>&2
@@ -190,9 +190,9 @@ if [ ! -n "$(command -v hyperfine)" ]; then
       --strip-components=1
     rm -rf /tmp/hyperfine/hyperfine.tar.gz
     sudo mv /tmp/hyperfine/hyperfine /usr/local/bin/
+    sudo chmod +x /usr/local/bin/hyperfine || true
   fi
   rm -rf /tmp/hyperfine
-  sudo chmod +x /usr/local/bin/hyperfine || true
 fi
 
 
@@ -230,9 +230,9 @@ if [ ! -n "$(command -v fd)" ]; then
       --strip-components=1
     rm -rf /tmp/fd/fd.tar.gz
     sudo mv /tmp/fd/fd /usr/local/bin/
+    sudo chmod +x /usr/local/bin/fd || true
   fi
   rm -rf /tmp/fd
-  sudo chmod +x /usr/local/bin/fd || true
 fi
 if [ ! -n "$(command -v procs)" ]; then
   echo "*** installing procs" 1>&2
