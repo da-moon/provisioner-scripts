@@ -80,7 +80,6 @@ $fonts = @(
 
 
 $python_software = @(
-  "ansible",
   "ansible-lint",
   "ansible-tower-cli"
 )
