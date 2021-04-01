@@ -5,6 +5,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+curl -fsSl https://raw.githubusercontent.com/da-moon/provisioner-scripts/master/bash/installer/hashicorp | bash -s -- --skip otto --skip serf --skip terraform --skip boundary --skip waypoint
+
 function help() {
   echo
   echo "Usage: [$(basename "$0")] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
