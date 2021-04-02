@@ -297,6 +297,7 @@ if ( test_command "pip3" )
 if ( test_command "code" ) 
 { 
 	info "VS Code detected. Adding it as a context menu option"
+	# reg import C:\ProgramData\scoop\apps\vscode\current\vscode-install-context.reg
 	reg import "$HOME\scoop\apps\vscode\current\vscode-install-context.reg"
 	if (test_command "git") 
 	{ 
