@@ -86,6 +86,10 @@ function main() {
   echo 'Please install "uname" package' 1>&2
   exit 1
   fi
+  rm -rf /tmp/hashicorp
+  mkdir -p /tmp/hashicorp
+  pushd /tmp/hashicorp >/dev/null 2>&1
+
   case "$OSTYPE" in
   darwin*)  platform="darwin" ;; 
   linux*)   platform="linux" ;;
@@ -96,9 +100,6 @@ function main() {
   i?86) arch="386";;
   arm64) arch="arm64";;
   esac
-  rm -rf /tmp/hashicorp
-  mkdir -p /tmp/hashicorp
-  pushd /tmp/hashicorp >/dev/null 2>&1
   latest_releases="$(curl -sL "https://releases.hashicorp.com/index.json" | jq -r "
   [
   to_entries | 
