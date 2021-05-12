@@ -60,7 +60,7 @@ if [ ! -n "$(command -v exa)" ]; then
           ).browser_download_url' | xargs -I {} wget -qO /tmp/exa/exa.zip {}
   unzip -d /tmp/exa /tmp/exa/exa.zip
   rm /tmp/exa/exa.zip
-  sudo mv /tmp/exa/exa-linux-x86_64 /usr/local/bin/exa
+  sudo mv /tmp/exa/bin/exa /usr/local/bin/exa
   rm -rf /tmp/exa
   sudo chmod +x /usr/local/bin/exa || true
 fi
