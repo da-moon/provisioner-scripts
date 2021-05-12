@@ -45,8 +45,8 @@ if [ -n "$(command -v go)" ]; then
   echo "*** go is already installed" 1>&2
   exit 0
 else
-  goenv install 1.15.5 || true
-  goenv global 1.15.5 || true
+  goenv install 1.16.3 || true
+  goenv global 1.16.3 || true
   echo 'export PATH="$PATH:$(go env GOROOT)/bin"' | tee -a ~/.profile > /dev/null
   echo 'export PATH="$PATH:$(go env GOPATH)/bin"' | tee -a ~/.profile > /dev/null
   echo 'export GO111MODULE=on' | tee -a ~/.profile > /dev/null
