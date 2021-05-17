@@ -26,7 +26,7 @@ if [ -n "$(command -v apt-get)" ]; then
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq >/dev/null 2>&1
   sudo apt-get -yqq install curl neovim \
-  python3-neovim vim-gtk >/dev/null 2>&1
+  python3-neovim vim-gtk xfonts-utils >/dev/null 2>&1
 fi
 if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
