@@ -26,7 +26,7 @@ if [ -n "$(command -v apt-get)" ]; then
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq >/dev/null 2>&1
   sudo apt-get -yqq install curl neovim \
-  python3-neovim vim-gtk xfonts-utils >/dev/null 2>&1
+  python3-neovim vim-gtk xfonts-utils fontconfig >/dev/null 2>&1
 fi
 if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
@@ -44,18 +44,6 @@ sudo python3 -m pip install --upgrade pynvim notedown > /dev/null 2>&1
 sudo yarn global add --silent remark remark-cli remark-stringify remark-frontmatter wcwidth >/dev/null 2>&1
 mkdir -p ~/.SpaceVim.d/
 cat << EOF | tee ~/.SpaceVim.d/init.toml > /dev/null
-[[custom_plugins]]
-  repo = "chr4/nginx.vim"
-  merged = false
-
-[[custom_plugins]]
-  repo = "hashivim/vim-hashicorp-tools"
-  merged = false
-
-[[custom_plugins]]
-  repo = "jvirtanen/vim-hcl"
-  merged = false
-
 [[layers]]
 name = 'autocomplete'
 auto_completion_return_key_behavior = "complete"
@@ -127,11 +115,6 @@ default_height = 30
 # sudo yarn global add --prefix /usr/local remark remark-cli remark-stringify remark-frontmatter wcwidth 
 [[layers]]
   name = "lang#markdown"
-
-## sudo yarn global add --prefix /usr/local typescript
-#[[layers]]
-#  # [REF] => https://spacevim.org/layers/lang/typescript/
-#  name = "lang#typescript"
 
 # go get -u github.com/jstemmer/gotags
 [[layers]]
