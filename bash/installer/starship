@@ -22,7 +22,7 @@ else
   echo "*** Detected Debian based Linux" 1>&2
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq > /dev/null 2>&1
-  sudo apt-get install jq curl libssl-dev -yqq > /dev/null 2>&1
+  sudo apt-get install jq curl libssl-dev fonts-symbola -yqq > /dev/null 2>&1
   fi
 fi
 if [ ! -n "$(command -v starship )" ]; then
