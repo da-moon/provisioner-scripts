@@ -31,7 +31,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
   fi
 source $HOME/.cargo/env
 rustup --version
-cargo --version
+cargo --version 
 rustc --version
 rustup update "${NIGHTLY_VERSION}"
 rustup default "${NIGHTLY_VERSION}"
@@ -40,4 +40,5 @@ rustup component add rust-src
 rustup component add rustfmt
 rustup component add rls
 rustup component add clippy
-cargo install -j $(nproc) cargo-watch cargo-cache cargo-tree systemfd petname tojson git-cm
+cargo install -j $(nproc) cargo-watch cargo-cache cargo-tree systemfd
+cargo install -j $(nproc) petname tojson git-cm git-journal gitoxide
