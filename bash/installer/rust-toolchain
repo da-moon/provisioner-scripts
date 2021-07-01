@@ -6,7 +6,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-export NIGHTLY_VERSION=nightly-2021-01-01
+# export NIGHTLY_VERSION=nightly-2021-01-01
 if [ ! $(which sudo) ]; then
 	echo 'Please install "sudo" package' 1>&2
 	exit 1
@@ -23,7 +23,7 @@ if [ -n "$(command -v apt-get)" ]; then
 fi
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
 -y \
---default-toolchain nightly \
+--default-toolchain stable \
 --profile default
   if ! grep -q "cargo" ~/.profile; then
   echo '[ -r $HOME/.cargo/env ] && . $HOME/.cargo/env' >> ~/.profile
@@ -33,8 +33,8 @@ source $HOME/.cargo/env
 rustup --version
 cargo --version 
 rustc --version
-rustup update "${NIGHTLY_VERSION}"
-rustup default "${NIGHTLY_VERSION}"
+# rustup update "${NIGHTLY_VERSION}"
+# rustup default "${NIGHTLY_VERSION}"
 rustup completions bash | sudo tee /etc/bash_completion.d/rustup.bash-completion > /dev/null
 rustup component add rust-src
 rustup component add rustfmt
