@@ -1,0 +1,35 @@
+$!/usr/bin/env bash
+
+INSTALLER_SCRIPTS_BASE_URL="https://raw.githubusercontent.com/da-moon/provisioner-scripts/master/bash/installer"
+UTIL_SCRIPTS_BASE_URL="https://raw.githubusercontent.com/da-moon/provisioner-scripts/master/bash/util"
+INSTALLER_SCRIPTS=(
+"${INSTALLER_SCRIPTS_BASE_URL}/init"
+"${INSTALLER_SCRIPTS_BASE_URL}/node"
+"${INSTALLER_SCRIPTS_BASE_URL}/python"
+"${INSTALLER_SCRIPTS_BASE_URL}/starship"
+"${INSTALLER_SCRIPTS_BASE_URL}/nu"
+"${INSTALLER_SCRIPTS_BASE_URL}/goenv"
+"${INSTALLER_SCRIPTS_BASE_URL}/spacevim"
+"${INSTALLER_SCRIPTS_BASE_URL}/hashicorp"
+"${INSTALLER_SCRIPTS_BASE_URL}/ripgrep"
+"${INSTALLER_SCRIPTS_BASE_URL}/docker"
+"${INSTALLER_SCRIPTS_BASE_URL}/lxd"
+)
+for script in ${INSTALLER_SCRIPTS[@]}; do
+  curl -fSsl "$script" | bash
+done
+[ -r /usr/local/bin/key-get ] || \
+  sudo curl -s \
+  -o /usr/local/bin/key-get \
+  ${UTIL_SCRIPTS_BASE_URL}/key-get && \
+  sudo chmod +x /usr/local/bin/key-get
+[ -r /usr/local/bin/lxd-debian ] || \
+  sudo curl -s \
+  -o /usr/local/bin/lxd-debian \
+  ${UTIL_SCRIPTS_BASE_URL}/lxd-debian && \
+  sudo chmod +x /usr/local/bin/lxd-debian
+[ -r /usr/local/bin/ngrok-init ] || \
+  sudo curl -s \
+  -o /usr/local/bin/ngrok-init \
+  ${INSTALLER_SCRIPTS_BASE_URL}/ngrok && \
+  sudo chmod +x /usr/local/bin/ngrok-init
