@@ -14,6 +14,10 @@ INSTALLER_SCRIPTS=(
 "${INSTALLER_SCRIPTS_BASE_URL}/ripgrep"
 "${INSTALLER_SCRIPTS_BASE_URL}/docker"
 "${INSTALLER_SCRIPTS_BASE_URL}/lxd"
+"${INSTALLER_SCRIPTS_BASE_URL}/rust-core-utils"
+"${INSTALLER_SCRIPTS_BASE_URL}/rust-toolchain"
+"${INSTALLER_SCRIPTS_BASE_URL}/ansible"
+"${INSTALLER_SCRIPTS_BASE_URL}/kube-util"
 )
 for script in ${INSTALLER_SCRIPTS[@]}; do
   curl -fSsl "$script" | bash
