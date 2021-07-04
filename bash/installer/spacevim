@@ -25,8 +25,11 @@ if [ -n "$(command -v apt-get)" ]; then
   echo "*** Detected Debian based Linux" 1>&2
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq >/dev/null 2>&1
-  sudo apt-get -yqq install curl neovim \
-  python3-neovim vim-gtk xfonts-utils fontconfig >/dev/null 2>&1
+  sudo apt-get -yqq install curl software-properties-common vim-gtk xfonts-utils fontconfig >/dev/null 2>&1
+  yes | sudo add-apt-repository ppa:neovim-ppa/unstable >/dev/null 2>&1
+  sudo apt-get update -qq >/dev/null 2>&1
+  sudo apt-get -yqq neovim python3-neovim >/dev/null 2>&1
+  nvim --version
 fi
 if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
