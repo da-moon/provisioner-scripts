@@ -33,12 +33,19 @@ log_level: info
 log_format: json
 log: $HOME/.local/log/ngrok.log
 tunnels:
-  terraform-ui:
-  addr: 127.0.0.1:32846
-  proto: http
-  hostname: heimdal-tfe.ngrok.io
-  inspect: true
-  bind_tls: true
+  ssh:
+    proto: tcp
+    addr: 22
+#  myapp-http:
+#    addr: 80
+#    proto: http
+#    hostname: example.com
+#    auth: "user:secretpassword"
+#    bind_tls: false
+#  myapp-https:
+#    addr: 443
+#    proto: tls
+#    hostname: example.com
 EOF
 sudo mkdir -p /usr/lib/systemd/system/
 cat << EOF | sudo tee /usr/lib/systemd/system/ngrok@.service > /dev/null
