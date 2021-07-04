@@ -40,5 +40,5 @@ rustup component add rust-src
 rustup component add rustfmt
 rustup component add rls
 rustup component add clippy
-cargo install -j $(nproc) cargo-watch cargo-cache cargo-tree systemfd
-cargo install -j $(nproc) petname tojson git-cm git-journal gitoxide
+# cargo install -j $(nproc) cargo-watch cargo-cache cargo-tree systemfd
+# cargo install -j $(nproc) petname tojson git-cm git-journal gitoxide
