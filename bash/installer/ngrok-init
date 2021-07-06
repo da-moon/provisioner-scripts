@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# curl -fsSl "https://raw.githubusercontent.com/da-moon/provisioner-scripts/master/bash/installer/ngrok-init" | bash
 set -o errtrace
 set -o functrace
 set -o errexit
