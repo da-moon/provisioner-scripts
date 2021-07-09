@@ -25,7 +25,9 @@ if [ -n "$(command -v apt-get)" ]; then
   ufw dstat bash-completion unzip zip iperf perl \
   software-properties-common netcat progress \
   sysstat make build-essential rsync ca-certificates git \
-  lsb-release aria2 xfonts-utils tmate ncdu neofetch >/dev/null 2>&1
+  lsb-release aria2 xfonts-utils tmate ncdu neofetch snapd >/dev/null 2>&1
+  sudo systemctl enable --now snapd >/dev/null 2>&1 || true
+  sudo ln -s /var/lib/snapd/snap /snap >/dev/null 2>&1 || true
 fi
 if [ -n "$(command -v pacman)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
@@ -50,6 +52,7 @@ EOF
   popd
   sudo rm -r /tmp/paru
 fi
+
 sudo sed -i -e '/net.ipv4.ip_forward=/d' /etc/sysctl.conf > /dev/null
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf > /dev/null
 sudo sed -i -e '/PermitRootLogin/d' /etc/ssh/sshd_config > /dev/null
