@@ -56,6 +56,7 @@ sudo usermod -aG "libvirt" $(whoami) || true
 sudo usermod -aG "libvirt-qemu" $(whoami) || true
 sudo usermod -aG "libvirt-dnsmasq" $(whoami) || true
 sudo usermod -aG "kvm" $(whoami) || true
+# https://github.com/hashicorp/vagrant/issues/12445#issuecomment-876254254
 [ -r /opt/vagrant/embedded/include/ruby-3.0.0/ruby/st.h ] \
 && [ ! -r /opt/vagrant/embedded/include/ruby-3.0.0/st.h ] \
 && sudo ln -s /opt/vagrant/embedded/include/ruby-3.0.0/ruby/st.h /opt/vagrant/embedded/include/ruby-3.0.0/st.h
