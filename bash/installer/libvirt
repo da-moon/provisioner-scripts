@@ -51,7 +51,8 @@ user = "$(id -u)"
 group = "$(id -g)"
 dynamic_ownership = 1
 EOF
-sudo systemctl restart libvirtd
+sudo systemctl disable --now libvirtd > /dev/null 2>&1 || true ;
+sudo systemctl enable --now libvirtd-tcp.socket
 sudo usermod -aG "libvirt" $(whoami) || true
 sudo usermod -aG "libvirt-qemu" $(whoami) || true
 sudo usermod -aG "libvirt-dnsmasq" $(whoami) || true
