@@ -51,8 +51,12 @@ user = "$(id -u)"
 group = "$(id -g)"
 dynamic_ownership = 1
 EOF
-sudo systemctl disable --now libvirtd > /dev/null 2>&1 || true ;
-sudo systemctl enable --now libvirtd-tcp.socket
+# [ TODO ] setup socket activation
+# https://stackoverflow.com/questions/47388652/restart-libvirtd-listen-error
+sudo systemctl mask libvirtd.socket libvirtd-ro.socket libvirtd-admin.socket libvirtd-tls.socket libvirtd-tcp.socket
+sudo systemctl disable --now libvirtd-tcp.socket > /dev/null 2>&1 || true
+sudo systemctl enable --now libvirtd
+sudo systemctl restart libvirtd
 sudo usermod -aG "libvirt" $(whoami) || true
 sudo usermod -aG "libvirt-qemu" $(whoami) || true
 sudo usermod -aG "libvirt-dnsmasq" $(whoami) || true
