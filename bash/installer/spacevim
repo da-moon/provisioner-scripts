@@ -4,6 +4,7 @@ set -o functrace
 set -o errexit
 set -o nounset
 set -o pipefail
+# https://gist.github.com/HouzuoGuo/9a48c6d28b90a16434ccfbdd9d9e4065
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 if [ ! $(which sudo) ]; then
 	echo 'Please install "sudo" package' 1>&2
