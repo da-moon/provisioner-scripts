@@ -35,6 +35,14 @@ if [ ! -n "$(command -v lxc)" ]; then
   echo "PATH=$PATH:/snap/bin" | sudo tee -a /etc/environment > /dev/null
   echo "export PATH=$PATH:/snap/bin" | sudo tee -a /root/.bashrc > /dev/null
 fi
+# lxd init \
+#   --auto \
+#   --network-address="0.0.0.0" \
+#   --network-port="8443" \
+#   --trust-password="$(whoami)" \
+#   --storage-backend="btrfs" \
+#   --storage-create-loop="60" \
+#   --storage-pool="default" || true
 export PATH=$PATH:/snap/bin
 sudo /bin/bash << _EOF_
 source ~/.bashrc
@@ -43,9 +51,7 @@ lxd init \
   --network-address="0.0.0.0" \
   --network-port="8443" \
   --trust-password="$(whoami)" \
-  --storage-backend="btrfs" \
-  --storage-create-loop="60" \
-  --storage-pool="default" || true
+  --storage-backend="dir" || true
 _EOF_
 # [NOTE] => needed to allow lxd containers to access internet
 sudo iptables -P FORWARD ACCEPT
