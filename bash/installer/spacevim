@@ -22,28 +22,45 @@ if [ ! $(which pip3) ]; then
   echo 'Please install "pip3" package'
 	exit 1
 fi
-if [ -n "$(command -v snap)" ]; then
-  echo "*** Detected snap package manager" 1>&2
-  sudo snap install nvim --edge --classic
+# if [ -n "$(command -v snap)" ]; then
+#   echo "*** Detected snap package manager" 1>&2
+#   sudo snap install nvim --edge --classic
+# fi
+if [ -n "$(command -v apt-get)" ]; then
+  echo "*** Detected Debian based Linux" 1>&2
+  export DEBIAN_FRONTEND=noninteractive
+  sudo apt-get update -qq >/dev/null 2>&1
+  if [ ! -z "$(command -v nvim)" ]; then
+  fi
+#   if ! command -- nvim -h > /dev/null 2>&1 ; then
+#     sudo apt-get -yqq install neovim
+#   fi
+  sudo apt-get install -yqq ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip curl >/dev/null 2>&1
 fi
+
+sudo mkdir -p "/usr/src/neovim"
+sudo git clone https://github.com/neovim/neovim.git "/usr/src/neovim" ;
+pushd /usr/src/neovim > /dev/null 2>&1 
+make -j`nproc` CMAKE_BUILD_TYPE=RelWithDebInfo ;
+CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=/usr/local" sudo make -j`nproc` install ;
+popd > /dev/null 2>&1 ;
+sudo rm -r /usr/src/neovim;
 
 if [ -n "$(command -v apt-get)" ]; then
   echo "*** Detected Debian based Linux" 1>&2
   export DEBIAN_FRONTEND=noninteractive
   sudo apt-get update -qq >/dev/null 2>&1
-  if [ ! -n "$(command -v nvim)" ]; then
-    sudo apt-get -yqq install neovim
-	fi
-  sudo apt-get -yqq install curl software-properties-common vim-gtk xfonts-utils fontconfig python3-neovim >/dev/null 2>&1
+  sudo apt-get -yqq install curl software-properties-common xfonts-utils fontconfig  >/dev/null 2>&1
+  sudo apt-get -yqq install  vim-gtk python3-neovim >/dev/null 2>&1
 fi
 if [ -n "$(command -v paru)" ]; then
   echo "*** Detected Arch based Linux" 1>&2
   paru --needed --removemake \
   --cleanafter --noconfirm \
   -Sy gvim python-pynvim curl xorg-font-utils
-  if [ ! -n "$(command -v nvim)" ]; then
-    paru --needed --removemake --cleanafter --noconfirm -Sy neovim
-	fi
+#   if [ ! -n "$(command -v nvim)" ]; then
+#     paru --needed --removemake --cleanafter --noconfirm -Sy neovim
+# 	fi
 fi
 vim --version
 nvim --version
