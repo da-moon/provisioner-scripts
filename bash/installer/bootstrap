@@ -17,23 +17,23 @@ INSTALLER_SCRIPTS=(
 # "${INSTALLER_SCRIPTS_BASE_URL}/rust-core-utils"
 "${INSTALLER_SCRIPTS_BASE_URL}/rust-toolchain"
 # "${INSTALLER_SCRIPTS_BASE_URL}/ansible"
-"${INSTALLER_SCRIPTS_BASE_URL}/kube-util"
+# "${INSTALLER_SCRIPTS_BASE_URL}/kube-util"
 )
 for script in ${INSTALLER_SCRIPTS[@]}; do
   curl -fSsl "$script" | bash
 done
-[ -r /usr/local/bin/key-get ] || \
-  sudo curl -s \
-  -o /usr/local/bin/key-get \
-  ${UTIL_SCRIPTS_BASE_URL}/key-get && \
-  sudo chmod +x /usr/local/bin/key-get
-[ -r /usr/local/bin/lxd-debian ] || \
-  sudo curl -s \
-  -o /usr/local/bin/lxd-debian \
-  ${UTIL_SCRIPTS_BASE_URL}/lxd-debian && \
-  sudo chmod +x /usr/local/bin/lxd-debian
-[ -r /usr/local/bin/ngrok-init ] || \
-  sudo curl -s \
-  -o /usr/local/bin/ngrok-init \
-  ${INSTALLER_SCRIPTS_BASE_URL}/ngrok && \
-  sudo chmod +x /usr/local/bin/ngrok-init
+# [ -r /usr/local/bin/key-get ] || \
+#   sudo curl -s \
+#   -o /usr/local/bin/key-get \
+#   ${UTIL_SCRIPTS_BASE_URL}/key-get && \
+#   sudo chmod +x /usr/local/bin/key-get
+# [ -r /usr/local/bin/lxd-debian ] || \
+#   sudo curl -s \
+#   -o /usr/local/bin/lxd-debian \
+#   ${UTIL_SCRIPTS_BASE_URL}/lxd-debian && \
+#   sudo chmod +x /usr/local/bin/lxd-debian
+# [ -r /usr/local/bin/ngrok-init ] || \
+#   sudo curl -s \
+#   -o /usr/local/bin/ngrok-init \
+#   ${INSTALLER_SCRIPTS_BASE_URL}/ngrok && \
+#   sudo chmod +x /usr/local/bin/ngrok-init
