@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# vim: ft=sh tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+set -xeuo pipefail
+
+# [ NOTE ] https://github.com/ro-ag/dockerfiles/blob/main/buildPerl/debian/Dockerfile
+# [ NOTE ] untested
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+if [ ! $(which sudo) ]; then
+	echo 'Please install "sudo" package' 1>&2
+	exit 1
+fi
+if [[ $EUID -eq 0 ]]; then
+   echo "You must run this script as non-root user with sudo permission." 1>&2
+   exit 1
+fi
+if [ -n "$(command -v apt-get)" ]; then
+	echo "*** Detected Debian based Linux" 1>&2
+	export DEBIAN_FRONTEND=noninteractive
+  sudo apt-get update -qq && sudo apt-get install -yqq \
+    curl \
+    git \
+    pkg-config \
+    wget \
+    build-essential \
+    zlib1g-dev \
+    pkg-config \
+    autoconf \
+    libtool \
+    binutils \
+    automake \
+    openssl \
+    pv \
+    libssl-dev 
+else 
+	echo "*** only apt-based package manager is supported at the moment" 1>&2
+  exit 1
+fi
+mkdir -p /tmp/perl
+# ENV PATH=/usr/local/perl-534/bin:$PATH
+export PERL_VERSION="5.34.0"
+pushd /tmp/perl > /dev/null 2>&1
+wget --no-check-certificate --progress=bar:force:noscroll "http://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz" \
+&& pv -f "perl-${PERL_VERSION}.tar.gz" | tar -xz \
+&& pushd "perl-${PERL_VERSION}" \
+&& ./Configure -s -des -O -Duse64bitall  -Dinc_version_list=none -Dusethreads -Dprefix="/usr/local/perl-${PERL_VERSION}" \
+&& make -j "$(nproc)" \
+&& TEST_JOBS="$(nproc)" make test_harness \
+&& sudo make install \
+&& popd > /dev/null 2>&1 \
+&& popd > /dev/null 2>&1 \
+&& rm -rf /tmp/perl ;
+
+
+## Basic Bundles
+curl -L http://cpanmin.us | sudo perl - App::cpanminus \
+&& sudo cpanm -S -f -i -q Modern::Perl \
+&& sudo cpanm -S -f -i -q Module::Install::Bundle  Bundle::CPAN  Bundle::Thread \
+  Perl::Installed JSON::Validator List::MoreUtils \
+  Mozilla::CA Syntax::Collector App::cpanoutdated
+
+## Update CPAN packages
+cpan-outdated -p | sudo cpanm \
+&& sudo cpanm -S -f -i Deep::Hash::Utils File::Util IO::Prompter 
+# Needed bundles
+cpanm -i -S -f Task::Kensho::Async \
+&& cpanm -i -S -f Task::Kensho::CLI \
+&& cpanm -i -S -f Task::Kensho::Dates \
+&& cpanm -i -S -f Task::Kensho::Logging \
+&& cpanm -i Task::Kensho::OOP
