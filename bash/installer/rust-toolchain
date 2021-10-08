@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # https://visualstudio.microsoft.com/visual-cpp-build-tools/
+# https://go.microsoft.com/fwlink/?LinkId=691126
 set -o errtrace
 set -o functrace
 set -o errexit
