@@ -33,14 +33,15 @@ sudo sed -i.bak \
   -e '/loop/d' \
   -e '/virtio/d' \
   -e '/9p/d' \
-  /etc/modules
-cat << EOF | sudo tee -a /etc/modules
-loop
-virtio
-9p
-9pnet
-9pnet_virtio
-EOF
+  "/etc/modules" ;
+( \
+echo "loop" ; \
+echo "virtio" ; \
+echo "9p" ; \
+echo "9pnet" ; \
+echo "9pnet_virtio" ; \
+) | sudo tee -a "/etc/modules-load.d/kvm.conf" > /dev/null
+
 sudo sed -i \
   -e '/user\s*=/d' \
   -e '/group\s*=/d' \
